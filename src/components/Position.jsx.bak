@@ -1,0 +1,37 @@
+import React, {useEffect} from "react";
+import axios from 'axios';
+
+function Position(props) {
+  const position = props.position;
+
+  useEffect(() => {
+    console.log("In Position useEffect. Position is " + position);
+  }, [position]);
+
+  return (
+    <div>
+      {(position == undefined) ? (
+        <div>
+          <input id="posId" type="text" name="position" placeholder="What seat do you want?" />
+          <button type="button"
+                  onClick={() => {
+                    // I want to see what the user entered
+                    var seat = document.getElementById("posId").value;
+                    console.log("User wants to play for " + seat);
+                    props.setFx(seat);
+                    <p id="seatId">Seat unknown</p>
+                    document.getElementById("seatId").innerHTML = seat;
+                  }} >Choose Seat</button>
+        </div>
+      ) : (
+        <div>
+        <p>You are player for {position}</p>
+        foo = document.getElementById("seatId").innerHTML.value;
+        <p id="seatId">You are sitting in seat {foo}</p>
+        </div>
+      )}
+   </div>
+  )
+}
+
+export default Position;
