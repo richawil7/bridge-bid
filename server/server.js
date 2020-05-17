@@ -167,7 +167,7 @@ app.post("/makeBid", function(req, res) {
   const bid = req.body.bid;
   console.log("Server received bid " + bid);
   processHumanBid(bid);
-  // res.redirect("/");
+  res.sendStatus(200);
 });
 
 // Post handler to initialize the session
@@ -182,7 +182,7 @@ app.post("/start", function(req, res) {
 
   statusMsg = "Waiting on dealer";
   gameState = 'start';
-  // res.redirect("/");
+  res.send('OK');
 });
 
 // Post handler for starting a new game
@@ -211,7 +211,7 @@ app.post("/newGame", function(req, res) {
   statusMsg = "Waiting on " + bidder + " to bid";
   gameState = 'active';
   getNextBid();
-  //res.redirect("/");
+  res.send('OK');
 });
 
 // Home page

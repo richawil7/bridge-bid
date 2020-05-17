@@ -4,25 +4,30 @@ import getStatus from "./GetStatus.jsx"
 
 function NewGame(props) {
   const state = props.state;
-  const delayTime = 1000;
+  const delayTime = 2* 1000;
 
-  useEffect(() => {
-    console.log("In NewGame useEffect. Delta=" + state.delta);
-  }, [state.delta]);
+  function clickHandler(myStr) {
+    const newGameNum = props.state.gameNum + 1;
+    console.log("New game number " + newGameNum);
+    console.log(myStr);
+    axios.post('/newGame', null)
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    setTimeout(function() {
+      props.setFx({...props.state, gameNum: newGameNum});
+      getStatus(props.state, props.setFx);
+    }, delayTime, newGameNum);
+  }
+
 
   {return (
     <div>
-      <form action="/newGame" method="post">
-        <button type="submit"
-                onClick={() => {
-                  const newGameNum = props.state.gameNum + 1;
-                  console.log("New game number " + newGameNum);
-                  setTimeout(function() {
-                    props.setFx({...props.state, gameNum: newGameNum});
-                    getStatus(props.state, props.setFx);
-                  }, delayTime, newGameNum);
-                }} >New Game</button>
-      </form>
+        <button type="button"
+                onClick={clickHandler} >New Game</button>
     </div>
   )}
 }

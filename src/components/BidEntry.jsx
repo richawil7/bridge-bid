@@ -1,23 +1,24 @@
 import React from "react";
-import getStatus from "./GetStatus.jsx";
-
-const delayTime = 1000;
+import axios from 'axios';
+import querystring from 'querystring';
 
 function BidEntry(props) {
+
   return (
     <div>
       <h3>Enter A Bid</h3>
-      <form action="/makeBid" method="post">
-        <input type="text" name="bid" placeholder="What is your bid?" />
-        <button type="submit" >Submit</button>
-      </form>
+      <input id="bidId" type="text" name="bid" placeholder="What is your bid?" />
+      <button type="button"
+        onClick={() => {
+          // I want to see what the user entered
+          var bidStr = document.getElementById("bidId").value;
+          console.log("User bid " + bidStr);
+          const bidObj = {bid: bidStr};
+          axios.post('http://localhost:3000/makeBid', querystring.stringify(bidObj));
+        }} >Submit
+      </button>
     </div>
   );
 }
-
-<form action="/newGame" method="post">
-  <button type="submit"
-           >New Game</button>
-</form>
 
 export default BidEntry;

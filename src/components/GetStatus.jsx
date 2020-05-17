@@ -1,8 +1,6 @@
 import React from "react";
 import axios from 'axios';
 
-const pollPeriod = 10 * 1000;
-
 function getStatus(st, setFx) {
   var foundChange = false;
   var changeCount = st.delta;
@@ -43,10 +41,6 @@ function getStatus(st, setFx) {
           console.log("Error in axios: " + error);
       })
 //    setTimeout(getStatus, pollPeriod, st, setFx);
-}
-
-function startPolling(st, setFx) {
-  getStatus(st, setFx);
 }
 
 export default getStatus;
