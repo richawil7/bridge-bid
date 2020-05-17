@@ -53,16 +53,15 @@ function App() {
     <div>
       <Header />
       <Scripts />
-      <Show state={state} />
-      <Status state={state} setFx={setState} />
-      <Position position={position} setFx={setPosition} />
+      <Position state={state} setFx={setState} position={position} setPosition={setPosition} />
       <SSEProvider endpoint="http://localhost:3000/sse">
+        <Status state={state} setFx={setState} />
+        <NewGame state={state} setFx={setState} />
         <BidHistory state={state} setFx={setState}/>
       </SSEProvider>
       <BidEntry state={state} setFx={setState} />
       <Hand state={state} position={position} />
-      <Start state={state} setFx={setState} />
-      <NewGame state={state} setFx={setState} />
+      <Show state={state} />
       <Footer />
     </div>
   );

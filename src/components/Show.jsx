@@ -12,7 +12,6 @@ function Show(props) {
       <h3>Debug Status</h3>
       <p>Message: {state.message}</p>
       <p>Bidder: {state.bidder}</p>
-      <p>Game: {state.game}</p>
       <p>Dealer: {state.dealer}</p>
       <p>GameNum: {state.gameNum}</p>
       <p>Delta: {state.delta}</p>

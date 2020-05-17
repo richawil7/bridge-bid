@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useEffect} from "react";
 import { useSSE } from 'react-hooks-sse';
 import DataTable from "./DataTable.jsx"
 import getStatus from "./GetStatus.jsx"

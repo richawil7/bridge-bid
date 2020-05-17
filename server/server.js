@@ -45,6 +45,7 @@ function announceBid(newBid) {
   console.log("announcing bid " + bidStr);
   bidState.lastBid = bidStr;
   bidState.count++;
+  //console.log("Pushing new bid event");
   emitter.emit('push', 'bidStream', {
     value: bidState.count,
   });
@@ -53,13 +54,21 @@ function announceBid(newBid) {
 
 /***** Global objects *****/
 var players = [];
+var gameNum = 0;
 var dealer = 'North';
 var bidder = 'Unknown';
 var bid;
 var passCount;
 var bidHistory = [];
 var statusMsg = "Uninitialized";
-var gameState = "start";
+
+/***** Initialization *****/
+bidMgr.init();
+
+// Create players for East and West, as they are played by the Server
+bidMgr.joinPlayer(players, 'East', false);
+bidMgr.joinPlayer(players, 'West', false);
+statusMsg = "Waiting on players to sit";
 
 /***** State Machine Event Handlers *****/
 
@@ -90,7 +99,6 @@ function getNextBid() {
       bidder = bidMgr.getNextPlayer(bidder);
       getNextBid();
     } else {
-      gameState = "over";
       statusMsg = "This hand is over. Press new game to play again."
     }
   }
@@ -120,7 +128,6 @@ function processHumanBid(bidStr) {
     bidder = bidMgr.getNextPlayer(bidder);
     getNextBid();
   } else {
-    gameState = "over";
     statusMsg = "This hand is over. Press new game to play again."
   }
 }
@@ -153,8 +160,8 @@ app.get("/update", function(req, res) {
     var status = {
       message: statusMsg,
       bidder: bidder,
-      game: gameState,
       bidHistory: bidHistory,
+      gameNum: gameNum,
       dealer: dealer
     };
 
@@ -170,18 +177,23 @@ app.post("/makeBid", function(req, res) {
   res.sendStatus(200);
 });
 
-// Post handler to initialize the session
-app.post("/start", function(req, res) {
-  console.log("Server received start request");
-  // Initialize the bid manager
-  bidMgr.init();
+// Post handler to add a new player
+app.post("/sit", function(req, res) {
+  const seat = req.body.seat;
+  console.log("Server received sit request from " + seat);
+  bidMgr.joinPlayer(players, seat, true);
+  var missingPlayer;
 
-  // Temporarily get North to join manually
-  // FIX ME. Should be driven by hitting north or south endpoint
-  bidMgr.joinPlayer(players, 'North');
-
-  statusMsg = "Waiting on dealer";
-  gameState = 'start';
+  (seat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
+  if (bidMgr.allPlayers()) {
+    statusMsg = "Waiting on new game request";
+    //console.log("Pushing new player event");
+    emitter.emit('push', 'playerEvent', {
+      value: bidMgr.numPlayers(players)
+    });
+  } else {
+    statusMsg = "Waiting on " + missingPlayer + " to join";
+  }
   res.send('OK');
 });
 
@@ -194,6 +206,7 @@ app.post("/newGame", function(req, res) {
   bidHistory.length = 0;
 
   // Rotate the Dealer
+  gameNum++;
   dealer = bidMgr.getNextPlayer(dealer);
   console.log("Dealer is " + dealer);
   bidder = dealer;
@@ -209,7 +222,10 @@ app.post("/newGame", function(req, res) {
   }
   passCount = 0;
   statusMsg = "Waiting on " + bidder + " to bid";
-  gameState = 'active';
+  //console.log("Pushing new game event");
+  emitter.emit('push', 'newGameEvent', {
+    value: gameNum
+  });
   getNextBid();
   res.send('OK');
 });

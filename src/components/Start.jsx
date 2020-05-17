@@ -29,7 +29,7 @@ function Start(props) {
 
   return (
     <div>
-      <form id="startForm" action="/start" method="post">
+      <form id="startForm" action="/sit" method="post">
         <button type="submit" onClick={() => {
           console.log("In startHandler");
           setTimeout(function() {

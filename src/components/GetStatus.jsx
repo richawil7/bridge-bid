@@ -15,11 +15,6 @@ function getStatus(st, setFx) {
           if (response.data.bidHistory.length != st.bidHistory.length) {
             foundChange = true;
           }
-          if (response.data.game != st.game) {
-            //console.log("Game changed");
-            foundChange = true;
-            //state.game = response.data.game;
-          }
           changeCount++;
           if (foundChange) {
             // changeCount++;
@@ -29,7 +24,7 @@ function getStatus(st, setFx) {
             setFx({...st,
                       message: response.data.message,
                       bidder: response.data.bidder,
-                      game: response.data.game,
+                      gameNum: response.data.gameNum,
                       dealer: response.data.dealer,
                       delta: changeCount});
           }

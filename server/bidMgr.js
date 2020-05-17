@@ -135,23 +135,14 @@ function init() {
   deck.createDeck();
 }
 
-function joinPlayer(players, position) {
-  players[position] = new playerModule.Player(position, true);
-
-  // FIX ME. Make South played by Computer
-  players['South'] = new playerModule.Player('South', false);
+function joinPlayer(players, position, isHuman) {
+  players[position] = new playerModule.Player(position, isHuman);
 
   // Check how many players we have at the table
   var playerCount = numPlayers(players);
-  if (playerCount === 2) {
-    // Create the other non-human players
-    players['East'] = new playerModule.Player('East', false);
-    players['West'] = new playerModule.Player('West', false);
-  } else {
-    console.log("You have " + playerCount + " players");
-  }
-
-  if (numPlayers(players) === 4) {
+  console.log("You have " + playerCount + " players");
+  if (playerCount == 4) {
+    console.log("All players have joined");
     allPlayersJoined = true;
     // console.log(players);
   }
@@ -202,6 +193,9 @@ function getNextPlayer(player) {
   return playerModule.getNextPlayer(player);
 }
 
+function allPlayers() {
+  return allPlayersJoined;
+}
 
 exports.init = init;
 exports.joinPlayer = joinPlayer;
@@ -209,4 +203,5 @@ exports.newGame = newGame;
 exports.quitPlayer = quitPlayer;
 exports.getNextPlayer = getNextPlayer;
 
-exports.allPlayersJoined = allPlayersJoined;
+exports.allPlayers = allPlayers;
+exports.numPlayers = numPlayers;
