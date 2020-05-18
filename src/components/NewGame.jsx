@@ -27,7 +27,7 @@ function NewGame(props) {
     setTimeout(function() {
       // props.setFx({...props.state, gameNum: newGameNum});
       getStatus(props.state, props.setFx);
-    }, delayTime, newGameNum);
+    }, delayTime);
   }
 
   {return (

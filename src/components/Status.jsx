@@ -19,8 +19,9 @@ function Status(props) {
   }, [state.message]);
 
   return (
-    <div>
+    <div id="statusDiv">
       <h3>Show Status</h3>
+      <p>You are playing for {props.position}</p>
       <p>Dealer is {state.dealer}</p>
       <p>{state.message}</p>
     </div>

@@ -1,4 +1,5 @@
 //jshint esversion:6
+const path = require('path');
 
 // Get the array of suits from the suit module
 const suitModule = require(__dirname + "/suit.js");
@@ -16,7 +17,6 @@ function Card(value, suit) {
     this.suit = suit;
     this.value = value;
     this.index = calcCardIndex(suit, value);
-    this.img = null;
     this.showCard = function() {
        const cardIndex = cvModule.CardValue[this.value];
        const cardProps = cvModule.CardValue.properties[cardIndex];

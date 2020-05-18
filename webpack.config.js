@@ -30,7 +30,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
         },
         {
           test: /\.css$/,
-          use: 'css-loader'
+          use: ['style-loader', 'css-loader']
         },
         {
           test: /\.script\.js$/,
@@ -44,13 +44,33 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
           ]
         },
         {
-            test: /\.scss$/,
-            use: [
-                'style-loader',
-                "css-loader",
-                "sass-loader"
-            ]
-        },
+          test: /\.(scss)$/,
+          use: [
+            {
+              // Adds CSS to the DOM by injecting a `<style>` tag
+              loader: 'style-loader'
+            },
+            {
+              // Interprets `@import` and `url()` like `import/require()` and will resolve them
+              loader: 'css-loader'
+            },
+            {
+              // Loader for webpack to process CSS with PostCSS
+              loader: 'postcss-loader',
+              options: {
+                plugins: function () {
+                  return [
+                    require('autoprefixer')
+                  ];
+                }
+              }
+            },
+            {
+              // Loads a SASS/SCSS file and compiles it to CSS
+              loader: 'sass-loader'
+            }
+          ]
+        },       
         {
             test: /\.(jpg|jpeg|gif|png|svg|webp)$/,
             use: [

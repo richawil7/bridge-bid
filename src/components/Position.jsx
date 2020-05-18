@@ -29,9 +29,8 @@ function Position(props) {
                     }, delayTime);
                   }} >Choose Seat</button>
         </div>
-      ) : (
-        <p>You are playing for {position}</p>
-      )}
+      ) : (null)
+      }
    </div>
   )
 }

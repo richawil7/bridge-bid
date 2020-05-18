@@ -1,6 +1,6 @@
 // jshint esversion:6
 const bidMgr = require(__dirname + "/bidMgr.js");
-
+const path = require('path');
 const express = require("express", "4.17.1");
 const app = express();
 const bodyParser = require("body-parser");
@@ -42,7 +42,7 @@ app.get('/sse', (req, res) => {
 
 function announceBid(newBid) {
   const bidStr = newBid.level.toString() + newBid.suit;
-  console.log("announcing bid " + bidStr);
+  // console.log("announcing bid " + bidStr);
   bidState.lastBid = bidStr;
   bidState.count++;
   //console.log("Pushing new bid event");
@@ -154,8 +154,7 @@ app.get("/:position/hand", function(req, res) {
 
 // This endpoint is called by the client to get game status
 app.get("/update", function(req, res) {
-    console.log("In server update handler");
-
+    // console.log("In server update handler");
     // Create an object for holding the status
     var status = {
       message: statusMsg,
@@ -232,7 +231,6 @@ app.post("/newGame", function(req, res) {
 
 // Home page
 app.use('/', function(req, res) {
-  var path = require('path');
   res.sendFile(path.resolve(__dirname + "/../dist/index.html"));
 });
 

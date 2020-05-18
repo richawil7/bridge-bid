@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Cell from './Cell.jsx';
-import '../App.css';
 
 export default class DataTable extends React.Component {
   renderHeadingRow = (_cell, cellIndex) => {

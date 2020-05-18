@@ -9,15 +9,20 @@ import Hand from "./Hand.jsx";
 import NewGame from "./NewGame.jsx";
 import Status from "./Status.jsx";
 import BidHistory from "./BidHistory.jsx";
-import Start from "./Start.jsx";
+import Refresh from "./Refresh.jsx";
 import Position from "./Position.jsx";
-// import startPolling from "./GetStatus.jsx";
 import { SSEProvider } from 'react-hooks-sse';
-// import Comments from "./Comments.jsx";
 
-// import IFrame from "./IFrame.jsx";
+// Install all of bootstrap
+//import 'bootstrap';
+// Or install only the pieces you need
+//import 'bootstrap/js/dist/util';
+//import 'bootstrap/js/dist/dropdown';
+//import '../scss/app.scss';
 
-import '../App.css';
+// Custom style sheet for this application
+import '../styles/styles.css';
+
 
 function App() {
 
@@ -33,6 +38,8 @@ function App() {
   const [position, setPosition] = useState(undefined);
 
   const [state, setState] = useState(initState);
+
+  var debug = false;
   //const [cookies, setCookie] = useCookies(['position']);
   // setCookie('position', newName, { path: '/' });
 
@@ -54,14 +61,20 @@ function App() {
       <Header />
       <Scripts />
       <Position state={state} setFx={setState} position={position} setPosition={setPosition} />
-      <SSEProvider endpoint="http://localhost:3000/sse">
-        <Status state={state} setFx={setState} />
-        <NewGame state={state} setFx={setState} />
-        <BidHistory state={state} setFx={setState}/>
-      </SSEProvider>
-      <BidEntry state={state} setFx={setState} />
-      <Hand state={state} position={position} />
-      <Show state={state} />
+      {(position != undefined) ?
+        (<div>
+          <SSEProvider endpoint="http://localhost:3000/sse">
+            <Status state={state} setFx={setState} position={position}/>
+            <NewGame state={state} setFx={setState} />
+            <Refresh />
+            <BidHistory state={state} setFx={setState}/>
+          </SSEProvider>
+          <Hand state={state} position={position} />
+          <BidEntry state={state} setFx={setState} />
+        </div>
+        ) : (null)
+      }
+      {(debug) ? (<Show state={state} />) : (console.log("Debug disabled"))}
       <Footer />
     </div>
   );
