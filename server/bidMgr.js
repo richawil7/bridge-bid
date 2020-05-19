@@ -136,7 +136,13 @@ function init() {
 }
 
 function joinPlayer(players, position, isHuman) {
-  players[position] = new playerModule.Player(position, isHuman);
+  // Check if this player already exists
+  if (players[position] == null) {
+    players[position] = new playerModule.Player(position, isHuman);
+  } else {
+    console.log("Already have a player sitting at " + position);
+    return false;
+  }
 
   // Check how many players we have at the table
   var playerCount = numPlayers(players);
@@ -146,6 +152,7 @@ function joinPlayer(players, position, isHuman) {
     allPlayersJoined = true;
     // console.log(players);
   }
+  return true;
 }
 
 function newGame(players) {

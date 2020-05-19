@@ -36,7 +36,7 @@ function App() {
     delta: 0,
     gameNum: 0
   };
-  const [position, setPosition] = useState('North');
+  const [position, setPosition] = useState(undefined);
   const [state, setState] = useState(initState);
   const [showHands, setShowHands] = useState(false);
   var debug = false;
@@ -64,24 +64,24 @@ function App() {
       {(position != undefined) ?
         (<div>
           <SSEProvider endpoint="http://localhost:3000/sse">
-            <div class="row">
-              <div class="col-lg-5">
+            <div className="row">
+              <div className="col-lg-5">
                 <Status state={state} setFx={setState} position={position}/>
               </div>
-              <div class="col-lg-1"></div>
-              <div class="col-lg-6">
+              <div className="col-lg-1"></div>
+              <div className="col-lg-6">
                 <BidEntry state={state} setFx={setState} />
               </div>
             </div>
-            <div class="row">
-              <div class="col-lg-6">
+            <div className="row">
+              <div className="col-lg-6">
                 <Hand state={state} position={position} />
               </div>
-              <div class="col-lg-6">
+              <div className="col-lg-6">
                 <BidHistory state={state} setFx={setState}/>
               </div>
             </div>
-            <div class="control">
+            <div className="control">
               <NewGame state={state} setFx={setState} setShow={setShowHands} />
               <Refresh />
               <ShowHands setFx={setShowHands} />
@@ -91,33 +91,33 @@ function App() {
         ) : (null)
       }
       {(showHands) ?
-        (<div class='allHands'>
-          <div class="row">
-            <div class="col-lg-4"></div>
-            <div class="col-lg-4">
+        (<div className='allHands'>
+          <div className="row">
+            <div className="col-lg-4"></div>
+            <div className="col-lg-4">
               <h3 id='North'>North</h3>
                 <Hand state={state} position='North' />
               </div>
-            <div class="col-lg-4"></div>
+            <div className="col-lg-4"></div>
           </div>
-          <div class="row">
-            <div class="col-lg-4">
+          <div className="row">
+            <div className="col-lg-4">
               <h3 id='West' >West</h3>
               <Hand state={state} position='West' />
             </div>
-            <div class="col-lg-4"></div>
-            <div class="col-lg-4">
+            <div className="col-lg-4"></div>
+            <div className="col-lg-4">
               <h3 id='East'>East</h3>
               <Hand state={state} position='East' />
             </div>
           </div>
-          <div class="row">
-            <div class="col-lg-4"></div>
-            <div class="col-lg-4">
+          <div className="row">
+            <div className="col-lg-4"></div>
+            <div className="col-lg-4">
               <h3 id='South'>South</h3>
               <Hand state={state} position='South' />
             </div>
-            <div class="col-lg-4"></div>
+            <div className="col-lg-4"></div>
           </div>
         </div>) : (null)
       }

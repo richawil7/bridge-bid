@@ -69,8 +69,8 @@ bidMgr.init();
 bidMgr.joinPlayer(players, 'East', false);
 bidMgr.joinPlayer(players, 'West', false);
 // FIX ME
-bidMgr.joinPlayer(players, 'South', false);
-bidMgr.joinPlayer(players, 'North', true);
+//bidMgr.joinPlayer(players, 'South', false);
+// bidMgr.joinPlayer(players, 'North', true);
 statusMsg = "Waiting on players to sit";
 
 /***** State Machine Event Handlers *****/
@@ -181,12 +181,20 @@ app.post("/makeBid", function(req, res) {
 
 // Post handler to add a new player
 app.post("/sit", function(req, res) {
-  const seat = req.body.seat;
-  console.log("Server received sit request from " + seat);
-  bidMgr.joinPlayer(players, seat, true);
+  const reqSeat = req.body.seat;
+  console.log("Server received sit request from " + reqSeat);
+  var assignedSeat;
   var missingPlayer;
+  (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
+  const result = bidMgr.joinPlayer(players, reqSeat, true);
+  if (result) {
+    assignedSeat = reqSeat;
+  } else {
+    console.log("Seat for " + reqSeat + " is already taken");
+    assignedSeat = missingPlayer;
+    bidMgr.joinPlayer(players, missingPlayer, true);
+  }
 
-  (seat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
   if (bidMgr.allPlayers()) {
     statusMsg = "Waiting on new game request";
     //console.log("Pushing new player event");
@@ -196,7 +204,8 @@ app.post("/sit", function(req, res) {
   } else {
     statusMsg = "Waiting on " + missingPlayer + " to join";
   }
-  res.send('OK');
+
+  res.send(assignedSeat);
 });
 
 // Post handler for starting a new game

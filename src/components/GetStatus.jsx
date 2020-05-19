@@ -6,7 +6,7 @@ function getStatus(st, setFx) {
   var changeCount = st.delta;
   axios.get('http://localhost:3000/update')
       .then(response => {
-          console.log("getStatus: got response");
+          // console.log("getStatus: got response");
           if (response.data.message != st.message) {
             //console.log("Message changed");
             //state.message = response.data.message;
@@ -18,7 +18,7 @@ function getStatus(st, setFx) {
           changeCount++;
           if (foundChange) {
             // changeCount++;
-            console.log("getStatus: found change");
+            // console.log("getStatus: found change");
             st.bidHistory = response.data.bidHistory.slice();
 
             setFx({...st,
