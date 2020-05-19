@@ -18,11 +18,13 @@ function BidGrid(props) {
              ];
 
   return (
-    <div className='bidEntry' >
+    <div>
       {(props.state.bidder === props.position) ?
-        ( <div>
+        ( <div className='bidEntry'>
             <h3>Enter A Bid</h3>
-            <DataTable headings={headings} rows={bids} />
+            <div className='bidGrid'>
+              <DataTable headings={headings} rows={bids} />
+            </div>
           </div>
         ) : (null)
       }

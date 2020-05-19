@@ -69,7 +69,7 @@ bidMgr.init();
 bidMgr.joinPlayer(players, 'East', false);
 bidMgr.joinPlayer(players, 'West', false);
 // FIX ME
-bidMgr.joinPlayer(players, 'South', false);
+// bidMgr.joinPlayer(players, 'South', false);
 // bidMgr.joinPlayer(players, 'North', true);
 statusMsg = "Waiting on players to sit";
 
@@ -152,6 +152,18 @@ app.get("/:position/hand", function(req, res) {
     }
 
     const jsonStr = JSON.stringify(cardsInHand);
+    res.send(jsonStr);
+});
+
+// This endpoint is called by the client to get their hand evaluation
+app.get("/:position/eval", function(req, res) {
+    const position = req.params.position;
+    // const position = 'North';
+    console.log("In server get hand evaluation for " + position);
+
+    // Create an object for holding the data
+    const handEvaluation = bidMgr.getHandEval(players, position);
+    const jsonStr = JSON.stringify(handEvaluation);
     res.send(jsonStr);
 });
 
@@ -246,9 +258,13 @@ app.use('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + "/../dist/index.html"));
 });
 
+// Set up a port for the server to listen on
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000; // localhost:3000
+};
 
-// Start the server, listening on port 3000
-// This server can be reached at URL localhost:3000
-app.listen(3000, function() {
-    console.log("Server started on port 3000");
+// Start the server
+app.listen(port, function() {
+  console.log("Server started on port " + port);
 });

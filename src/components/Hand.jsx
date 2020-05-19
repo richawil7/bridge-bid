@@ -9,7 +9,7 @@ function Hand(props) {
   });
 
   useEffect(() => {
-    const url = 'http://localhost:3000/' + props.position + '/hand'
+    const url = 'http://192.168.1.5:3000/' + props.position + '/hand'
     axios.get(url)
       .then(response => {
           console.log(response);

@@ -11,7 +11,7 @@ export default function Cell({
     const bid = event.target.dataset.bid;
     console.log("User bids " + bid);
     const bidObj = {bid: bid};
-    axios.post('http://localhost:3000/makeBid', querystring.stringify(bidObj));
+    axios.post('http://192.168.1.5:3000/makeBid', querystring.stringify(bidObj));
   }
 
   const cellMarkup = header ? (

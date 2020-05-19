@@ -15,7 +15,7 @@ function BidEntry(props) {
             var bidStr = document.getElementById("bidId").value;
             console.log("User bid " + bidStr);
             const bidObj = {bid: bidStr};
-            axios.post('http://localhost:3000/makeBid', querystring.stringify(bidObj));
+            axios.post('http://192.168.1.5:3000/makeBid', querystring.stringify(bidObj));
           }} >Submit
           </button>
       </div>

@@ -10,7 +10,8 @@ import Hand from "./Hand.jsx";
 import NewGame from "./NewGame.jsx";
 import Status from "./Status.jsx";
 import BidHistory from "./BidHistory.jsx";
-import Refresh from "./Refresh.jsx";
+import HandEvalBtn from "./HandEvalBtn.jsx";
+import HandEval from "./HandEval.jsx";
 import Position from "./Position.jsx";
 import ShowHands from "./ShowHands.jsx";
 import { SSEProvider } from 'react-hooks-sse';
@@ -37,9 +38,13 @@ function App() {
     delta: 0,
     gameNum: 0
   };
-  const [position, setPosition] = useState(undefined);
   const [state, setState] = useState(initState);
+  const [position, setPosition] = useState(undefined);
   const [showHands, setShowHands] = useState(false);
+  const [showEval, setShowEval] = useState(false);
+  const [handEval, setHandEval] = useState(undefined);
+  const serverBaseUrl = "http://192.168.1.5:3000/"
+  const serverEventUrl = serverBaseUrl + "sse"
   var debug = false;
   //const [cookies, setCookie] = useCookies(['position']);
   // setCookie('position', newName, { path: '/' });
@@ -64,7 +69,7 @@ function App() {
       <Position state={state} setFx={setState} position={position} setPosition={setPosition} />
       {(position != undefined) ?
         (<div>
-          <SSEProvider endpoint="http://localhost:3000/sse">
+          <SSEProvider endpoint={serverEventUrl}>
             <div className="row">
               <div className="col-lg-6">
                 <Status state={state} setFx={setState} position={position}/>
@@ -82,11 +87,14 @@ function App() {
                 <Hand state={state} position={position} />
               </div>
               <div className="col-lg-2 control">
-                <NewGame state={state} setFx={setState} setShow={setShowHands} />
-                <Refresh />
+                <NewGame state={state} setFx={setState} setShowHand={setShowHands} setShowEval={setShowEval}/>
+                <HandEvalBtn position={position} setShowFx={setShowEval} setEvalFx={setHandEval}/>
                 <ShowHands setFx={setShowHands} />
               </div>
-              <div className="col-lg-4"></div>
+              <div className="col-lg-3">
+                <HandEval showEval={showEval} handEval={handEval} />
+              </div>
+              <div className="col-lg-1"></div>
             </div>
           </SSEProvider>
         </div>
@@ -107,11 +115,12 @@ function App() {
               <h3 id='West' >West</h3>
               <Hand state={state} position='West' />
             </div>
-            <div className="col-lg-4"></div>
+            <div className="col-lg-2"></div>
             <div className="col-lg-4">
               <h3 id='East'>East</h3>
               <Hand state={state} position='East' />
             </div>
+            <div className="col-lg-2"></div>
           </div>
           <div className="row">
             <div className="col-lg-4"></div>

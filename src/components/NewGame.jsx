@@ -25,7 +25,10 @@ function NewGame(props) {
         console.log(error);
       });
     // Disable showing all hands
-    props.setShow(false);
+    props.setShowHand(false);
+    // Disable show hand Evaluation
+    props.setShowEval(false);
+
     setTimeout(function() {
       // props.setFx({...props.state, gameNum: newGameNum});
       getStatus(props.state, props.setFx);

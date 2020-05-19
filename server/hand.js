@@ -159,6 +159,26 @@ exports.Hand = function(dealtCards) {
   this.player = null;
 };
 
+exports.getHandEval = function(hand) {
+  const distStr = hand.distribution[3] + ' ' + hand.distribution[2] + ' ' +
+                   hand.distribution[1] + ' ' + hand.distribution[0];
+  const balanceStr = hand.isBalanced ? 'balanced' : 'unbalanced';
+  var recommendedBid = 'Pass';
+  if (hand.openingBid.level > 0) {
+    recommendedBid = hand.openingBid.level + hand.openingBid.suit;
+  }
+
+  const handEval = {
+    distribution: distStr,
+    balance: balanceStr,
+    hcp: hand.hcPts,
+    distPts: hand.distPts,
+    totalPts: hand.totalPts,
+    openBid: recommendedBid
+  };
+  return handEval;
+};
+
 exports.show = function(hand) {
   hand.handCards.forEach(function(aCard) {
     aCard.showCard();

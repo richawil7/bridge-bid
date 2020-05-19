@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {getHandEval} from "./GetStatus.jsx";
+import React from 'react';
+import axios from 'axios';
 
 function HandEvalBtn(props) {
 
@@ -11,7 +11,7 @@ function HandEvalBtn(props) {
             console.log("getHandEval: got response");
             console.log(response.data);
 
-            props.setFx({
+            props.setEvalFx({
                         distribution: response.data.distribution,
                         balance: response.data.balance,
                         hcp: response.data.hcp,
@@ -19,23 +19,12 @@ function HandEvalBtn(props) {
                         totalPts: response.data.totalPts,
                         openBid: response.data.openBid
                         });
-            }
+            props.setShowFx(true);
           })
         .catch(function (error) {
             console.log("Error in axios: " + error);
         })
   }
-
-  useEffect(() => {
-
-    axios.get(url)
-      .then(response => {
-          console.log(response);
-      })
-      .catch(function (error) {
-          console.log("Error in axios: " + error);
-      });
-  }, [props.showEval]);
 
   return (
     <div id='evalBtn'>

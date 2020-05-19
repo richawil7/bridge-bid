@@ -15,7 +15,7 @@ function Position(props) {
     const reqSeat = event.target.dataset.seat;
     console.log("User wants to play for " + reqSeat);
     var seatObj = {seat: reqSeat};
-    axios.post('http://localhost:3000/sit', querystring.stringify(seatObj))
+    axios.post('http://192.168.1.5:3000/sit', querystring.stringify(seatObj))
     .then((response) => {
       //console.log("Axios got response status " + response.status);
       // console.log("Axios got response text " + response.statusText);
@@ -33,7 +33,7 @@ function Position(props) {
   return (
     <div>
       {(position == undefined) ? (
-        <div>
+        <div className="position">
           <h3>Select A Seat</h3>
           <div className="dropdown">
             <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -52,13 +52,3 @@ function Position(props) {
 }
 
 export default Position;
-
-<div>
-  <input id="posId" type="text" name="position" placeholder="What seat do you want?" />
-  <button className="btn btn-sm btn-primary ctrl-btn" type="button"
-          onClick={() => {
-            // I want to see what the user entered
-            var seat = document.getElementById("posId").value;
-
-          }} >Choose Seat</button>
-</div>

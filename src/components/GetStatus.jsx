@@ -4,7 +4,7 @@ import axios from 'axios';
 function getStatus(st, setFx) {
   var foundChange = false;
   var changeCount = st.delta;
-  axios.get('http://localhost:3000/update')
+  axios.get('http://192.168.1.5:3000/update')
       .then(response => {
           // console.log("getStatus: got response");
           if (response.data.message != st.message) {

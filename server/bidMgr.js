@@ -181,7 +181,15 @@ function newGame(players) {
     handModule.show(players['West'].hand);
     */
   // Show the hand to north
-  handModule.show(players['North'].hand);
+  //handModule.show(players['North'].hand);
+}
+
+function getHandEval(players, position) {
+  if (players[position] != null) {
+    return (handModule.getHandEval(players[position].hand));
+  } else {
+    return null;
+  }
 }
 
 function quitPlayer(players, position) {
@@ -212,3 +220,4 @@ exports.getNextPlayer = getNextPlayer;
 
 exports.allPlayers = allPlayers;
 exports.numPlayers = numPlayers;
+exports.getHandEval = getHandEval;
