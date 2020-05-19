@@ -1,6 +1,9 @@
 
 /* Headings */
-
+h1 {
+  font-size: 20px;
+  color: #5eacb5;
+}
 h3 {
   font-size: 16px;
   color: #5eacb5;
@@ -50,13 +53,13 @@ h4 {
   border: 1px solid black;
   padding: 4px;
   text-align: center;
-  width: 50px;
+  font-size: 10px;
 }
 
 /* Hand Section */
 .hand {
   position: relative;
-  margin: 20px 0 50px 20px;
+  margin: 0 0 50px 20px;
   height: 200px;
 }
 .card {
@@ -117,34 +120,28 @@ h4 {
     z-index: 13;
 }
 
-.image-stack__item--bottom {
-    float: right;
-    width: 75%;
-}
-
-
 /* Control Section */
 .control {
   text-align: center;
   width: 100%;
 }
-
 .ctrl-btn {
     width: 100px;
     margin: 2px 4px 40px 4px;
 }
 #newGameBtn {
-  display: inline-block;
-  margin: 0 auto;
+/*  display: inline-block; */
+  margin: 50px auto 10px;
 }
 #refreshBtn {
-  display: inline-block;
-  margin: 0 auto;
+/*  display: inline-block; */
+  margin: 10px auto 10px;
 }
 #showHandsBtn {
-  display: inline-block;
-  margin: 0 auto;
+/*  display: inline-block; */
+  margin: 10px auto 0;
 }
+
 /* Show All Hands Section */
 .allHands {
   margin: 50px 20px 10px;

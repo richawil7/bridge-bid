@@ -1,16 +1,25 @@
 import * as React from 'react';
+import axios from 'axios';
+import querystring from 'querystring';
 
 export default function Cell({
   content,
   header,
 }) {
 
+  function bidSelected(event) {
+    const bid = event.target.dataset.bid;
+    console.log("User bids " + bid);
+    const bidObj = {bid: bid};
+    axios.post('http://localhost:3000/makeBid', querystring.stringify(bidObj));
+  }
+
   const cellMarkup = header ? (
     <th className="Cell Cell-header">
       {content}
     </th>
   ) : (
-    <td className="Cell">
+    <td className="Cell" data-bid={content} onClick={bidSelected} >
       {content}
     </td>
   );

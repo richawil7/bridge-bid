@@ -35,7 +35,6 @@ function getStatus(st, setFx) {
       .catch(function (error) {
           console.log("Error in axios: " + error);
       })
-//    setTimeout(getStatus, pollPeriod, st, setFx);
 }
 
 export default getStatus;

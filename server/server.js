@@ -69,7 +69,7 @@ bidMgr.init();
 bidMgr.joinPlayer(players, 'East', false);
 bidMgr.joinPlayer(players, 'West', false);
 // FIX ME
-//bidMgr.joinPlayer(players, 'South', false);
+bidMgr.joinPlayer(players, 'South', false);
 // bidMgr.joinPlayer(players, 'North', true);
 statusMsg = "Waiting on players to sit";
 

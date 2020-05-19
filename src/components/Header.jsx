@@ -1,9 +1,7 @@
 import React from "react";
 
 function Header() {
-  const customStyle = {
-    color: ""
-  };
+
   return (
     <div>
       <header>
@@ -13,7 +11,7 @@ function Header() {
       <script>console.log("Running embedded script")</script>
       <script type="text/javascript" src="test.js" ></script>
       <script type="text/javascript" src="event.js" ></script>
-      <h1 className="heading" style={customStyle}>
+      <h1 className="heading" >
         Practice Bridge Bidding
       </h1>
     </div>

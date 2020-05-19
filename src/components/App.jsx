@@ -4,7 +4,8 @@ import Scripts from "./Scripts.jsx";
 import Show from "./Show.jsx";
 import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";
-import BidEntry from "./BidEntry.jsx";
+//import BidEntry from "./BidEntry.jsx";
+import BidGrid from "./BidGrid.jsx";
 import Hand from "./Hand.jsx";
 import NewGame from "./NewGame.jsx";
 import Status from "./Status.jsx";
@@ -65,26 +66,27 @@ function App() {
         (<div>
           <SSEProvider endpoint="http://localhost:3000/sse">
             <div className="row">
-              <div className="col-lg-5">
+              <div className="col-lg-6">
                 <Status state={state} setFx={setState} position={position}/>
               </div>
-              <div className="col-lg-1"></div>
-              <div className="col-lg-6">
-                <BidEntry state={state} setFx={setState} />
+              <div className="col-lg-2">
+                <BidHistory state={state} setFx={setState}/>
               </div>
+              <div className="col-lg-2">
+                <BidGrid state={state} setFx={setState} position={position}/>
+              </div>
+              <div className="col-lg-2"></div>
             </div>
             <div className="row">
               <div className="col-lg-6">
                 <Hand state={state} position={position} />
               </div>
-              <div className="col-lg-6">
-                <BidHistory state={state} setFx={setState}/>
+              <div className="col-lg-2 control">
+                <NewGame state={state} setFx={setState} setShow={setShowHands} />
+                <Refresh />
+                <ShowHands setFx={setShowHands} />
               </div>
-            </div>
-            <div className="control">
-              <NewGame state={state} setFx={setState} setShow={setShowHands} />
-              <Refresh />
-              <ShowHands setFx={setShowHands} />
+              <div className="col-lg-4"></div>
             </div>
           </SSEProvider>
         </div>
