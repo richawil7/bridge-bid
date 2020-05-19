@@ -3,8 +3,9 @@ import React from 'react';
 function Refresh() {
 
   return (
-    <div>
-      <button type="button" onClick = {() => {
+    <div id='refreshBtn'>
+      <button type="button" className="btn btn-sm btn-danger ctrl-btn"
+        onClick = {() => {
           getStatus(props.state, props.setFx);
         }
       } > Refresh

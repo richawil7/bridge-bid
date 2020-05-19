@@ -24,6 +24,8 @@ function NewGame(props) {
       .catch(function (error) {
         console.log(error);
       });
+    // Disable showing all hands
+    props.setShow(false);
     setTimeout(function() {
       // props.setFx({...props.state, gameNum: newGameNum});
       getStatus(props.state, props.setFx);
@@ -31,8 +33,8 @@ function NewGame(props) {
   }
 
   {return (
-    <div>
-        <button type="button"
+    <div id='newGameBtn' >
+        <button type="button" className="btn btn-sm btn-success ctrl-btn"
                 onClick={clickHandler} >New Game</button>
     </div>
   )}

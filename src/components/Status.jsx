@@ -19,11 +19,13 @@ function Status(props) {
   }, [state.message]);
 
   return (
-    <div id="statusDiv">
-      <h3>Show Status</h3>
-      <p>You are playing for {props.position}</p>
-      <p>Dealer is {state.dealer}</p>
-      <p>{state.message}</p>
+    <div className='status'>
+      <h3>Status</h3>
+      <div id="statusDiv">
+        <h4>You are playing for {props.position}</h4>
+        <h4>Dealer is {state.dealer}</h4>
+        <h4>{state.message}</h4>
+      </div>
     </div>
   );
 }

@@ -25,11 +25,12 @@ function Hand(props) {
   }, [props.state.gameNum]);
 
   return (
-    <div>
+    <div className='hand'>
+      <h3>Hand</h3>
       {handState.valid ? (
-        handState.hand.map(function(card, index) {
-          return (<Card key={index} suit={card.suit} level={card.value} />)
-        })
+          handState.hand.map(function(card, index) {
+            return (<Card key={index} index={index} suit={card.suit} level={card.value} />)
+          })
       ) : (
         <p>Hand has not yet been dealt</p>
       )}

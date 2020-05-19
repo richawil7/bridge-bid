@@ -16,7 +16,7 @@ function Position(props) {
       {(position == undefined) ? (
         <div>
           <input id="posId" type="text" name="position" placeholder="What seat do you want?" />
-          <button type="button"
+          <button className="btn btn-sm btn-primary ctrl-btn" type="button"
                   onClick={() => {
                     // I want to see what the user entered
                     var seat = document.getElementById("posId").value;

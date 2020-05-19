@@ -6,8 +6,9 @@ function Card(props) {
   const level = props.level;
   const bidStr = level + ' of ' + suit;
   var imgFile  = "/images/cards/" + level + suit + ".png";
+  const cardIndex = 'card' + props.index;
   return (
-      <img src={imgFile} width='60' height='80' alt={bidStr}/>
+    <img id={cardIndex} className='card' src={imgFile} alt={bidStr} />
   );
 }
 

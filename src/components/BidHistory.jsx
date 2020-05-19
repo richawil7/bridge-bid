@@ -16,7 +16,12 @@ function BidHistory(props) {
   var columnIndex = 0;
   state.bidHistory.forEach(function (bid) {
     // console.log("Bid hist: " + bid.level + bid.suit);
-    var bidStr = "'" + bid.level + bid.suit + "'";
+    var bidStr;
+    if (bid.level == 0) {
+      bidStr = 'Pass';
+    } else {
+      bidStr = bid.level + bid.suit;
+    }
     rows[rowIndex].push(bidStr);
     columnIndex++;
     if (columnIndex == 4) {
@@ -39,7 +44,7 @@ function BidHistory(props) {
   // console.log("Rows: " + rows);
 
   return (
-    <div>
+    <div className='bidHistory'>
       <h3>Bid History</h3>
       <DataTable headings={headings} rows={rows} />
     </div>

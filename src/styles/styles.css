@@ -2,24 +2,171 @@
 /* Headings */
 
 h3 {
-  font-size: 4rem;
+  font-size: 16px;
+  color: #5eacb5;
+}
+h4 {
+  font-size: 14px;
+}
+
+/* Position Section */
+#posId {
+  margin: 10px 2px 0 10px
 }
 
 /* Status Section */
+.status {
+  position: relative;
+  margin: 20px 0 50px 20px;
+}
 #statusDiv {
   border: 2px solid black;
   font-size: 10px;
+  background-color: #a6d3de;
 }
 
+/* Bid Entry Section */
+.bidEntry {
+  position: relative;
+  margin: 20px 0 50px 20px;
+}
+#bidId {
+  display: block;
+  margin-top: 20px;
+  margin-left: 4px;
+}
+
+/* Bid History Section */
+.bidHistory {
+  position: relative;
+  margin: 20px 0 50px 20px;
+}
 .Table {
   border-spacing: 0;
   background: #fff;
   box-shadow: 0 1px 0 0 rgba(22, 29, 37, 0.05);
 }
-
 .Cell {
   border: 1px solid black;
   padding: 4px;
   text-align: center;
   width: 50px;
+}
+
+/* Hand Section */
+.hand {
+  position: relative;
+  margin: 20px 0 50px 20px;
+  height: 200px;
+}
+.card {
+  width: 150px;
+  height: 200px;
+  position: absolute;
+}
+#card0 {
+    left: 0;
+    z-index: 1;
+}
+#card1 {
+    left: 30px;
+    z-index: 2;
+}
+#card2 {
+    left: 60px;
+    z-index: 3;
+}
+#card3 {
+    left: 90px;
+    z-index: 4;
+}
+#card4 {
+    left: 120px;
+    z-index: 5;
+}
+#card5 {
+    left: 150px;
+    z-index: 6;
+}
+#card6 {
+    left: 180px;
+    z-index: 7;
+}
+#card7 {
+    left: 210px;
+    z-index: 8;
+}
+#card8 {
+    left: 240px;
+    z-index: 9;
+}
+#card9 {
+    left: 270px;
+    z-index: 10;
+}
+#card10 {
+    left: 300px;
+    z-index: 11;
+}
+#card11 {
+    left: 330px;
+    z-index: 12;
+}
+#card12 {
+    left: 360px;
+    z-index: 13;
+}
+
+.image-stack__item--bottom {
+    float: right;
+    width: 75%;
+}
+
+
+/* Control Section */
+.control {
+  text-align: center;
+  width: 100%;
+}
+
+.ctrl-btn {
+    width: 100px;
+    margin: 2px 4px 40px 4px;
+}
+#newGameBtn {
+  display: inline-block;
+  margin: 0 auto;
+}
+#refreshBtn {
+  display: inline-block;
+  margin: 0 auto;
+}
+#showHandsBtn {
+  display: inline-block;
+  margin: 0 auto;
+}
+/* Show All Hands Section */
+.allHands {
+  margin: 50px 20px 10px;
+}
+#North {
+  text-align: center;
+}
+#East {
+  text-align: right;
+}
+#West {
+  text-align: left;
+  margin-left: 30px;
+}
+#South {
+  text-align: center;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  font-size: 6px;
+  position: relative;
+  margin: 100px, auto, 0;
 }
