@@ -18,7 +18,11 @@ function BidHistory(props) {
     // console.log("Bid hist: " + bid.level + bid.suit);
     var bidStr;
     if (bid.level == 0) {
-      bidStr = 'Pass';
+      if (bid.suit == 'C') {
+        bidStr = 'Pass';
+      } else if (bid.suit == 'S') {
+        bidStr = 'Double';
+      }
     } else {
       bidStr = bid.level + bid.suit;
     }

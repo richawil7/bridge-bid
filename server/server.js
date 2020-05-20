@@ -69,7 +69,7 @@ bidMgr.init();
 bidMgr.joinPlayer(players, 'East', false);
 bidMgr.joinPlayer(players, 'West', false);
 // FIX ME
-// bidMgr.joinPlayer(players, 'South', false);
+bidMgr.joinPlayer(players, 'South', false);
 // bidMgr.joinPlayer(players, 'North', true);
 statusMsg = "Waiting on players to sit";
 
@@ -93,7 +93,7 @@ function getNextBid() {
     // Add this bid to the history
     bidHistory.push(nextBid);
 
-    if (nextBid.level === 0) {
+    if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
       passCount++;
     } else {
       passCount = 0;    // Make this next bid the current bid
@@ -108,10 +108,23 @@ function getNextBid() {
 }
 
 function processHumanBid(bidStr) {
-  const level = Number(bidStr.charAt(0));
-  const suit = bidStr.charAt(1);
-  if (suit === 'N') {
-    suit = "NT";
+  var level;
+  var suit;
+  const levelChar = bidStr.charAt(0);
+  if (levelChar === 'P') {
+    // This is a pass bidStr
+    level = 0;
+    suit = 'C';
+  } else if (levelChar === 'D') {
+    // Bid was a double
+    level = 0;
+    suit = 'S';
+  } else {
+    level = Number(levelChar);
+    suit = bidStr.charAt(1);
+    if (suit === 'N') {
+      suit = "NT";
+    }
   }
   nextBid = {suit: suit, level: level};
   console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
@@ -122,7 +135,7 @@ function processHumanBid(bidStr) {
   // Add this bid to the history
   bidHistory.push(bid);
 
-  if (nextBid.level === 0) {
+  if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
     passCount++;
   } else {
     passCount = 0;
@@ -243,7 +256,7 @@ app.post("/newGame", function(req, res) {
       }
     }
   }
-  passCount = 0;
+  passCount = -1;
   statusMsg = "Waiting on " + bidder + " to bid";
   //console.log("Pushing new game event");
   emitter.emit('push', 'newGameEvent', {
