@@ -27,9 +27,9 @@ function HandEvalBtn(props) {
   }
 
   return (
-    <div id='evalBtn'>
+    <div>
       <button type="button" className="btn btn-sm btn-danger ctrl-btn"
-        onClick={clickHandler} > Hand Evaluation
+        onClick={clickHandler} > Evaluate
       </button>
     </div>
   );

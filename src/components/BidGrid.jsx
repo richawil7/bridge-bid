@@ -4,8 +4,7 @@ import DataTable from "./DataTable.jsx"
 
 function BidGrid(props) {
 
-  //const headings = ['Club', 'Diamond', 'Heart', 'Spade', 'No Trump'];
-  const headings = [];
+  const headings = ['Club', 'Diamond', 'Heart', 'Spade', 'No Trump'];
 
   var bids = [['1C', '1D', '1H', '1S', '1NT'],
               ['2C', '2D', '2H', '2S', '2NT'],

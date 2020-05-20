@@ -266,6 +266,37 @@ app.post("/newGame", function(req, res) {
   res.send('OK');
 });
 
+// Post handler for rebidding the current hand
+app.post("/rebid", function(req, res) {
+  console.log("Server received rebid request");
+
+  // Clear any previous bidHistory
+  bidHistory.length = 0;
+
+  // Reset the bidder to be the dealer
+  gameNum++;
+  bidder = dealer;
+  bid = {suit: 'X', level: 0};
+  if (dealer != 'North') {
+    bidHistory.push(bid);
+    if (dealer != 'East') {
+      bidHistory.push(bid);
+      if (dealer != 'South') {
+        bidHistory.push(bid);
+      }
+    }
+  }
+  passCount = -1;
+  statusMsg = "Waiting on " + bidder + " to bid";
+  //console.log("Pushing new game event");
+  emitter.emit('push', 'newGameEvent', {
+    value: gameNum
+  });
+  getNextBid();
+  res.send('OK');
+});
+
+
 // Home page
 app.use('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + "/../dist/index.html"));

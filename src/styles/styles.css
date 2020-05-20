@@ -37,7 +37,7 @@ p {
   margin: 20px 0 50px 20px;
 }
 .bidGrid {
-  background-color: #a6d3de;
+  background-color: #fff;
 }
 #bidId {
   display: block;
@@ -53,14 +53,15 @@ p {
 .Table {
   border-spacing: 0;
   background: #fff;
-  box-shadow: 0 1px 0 0 rgba(22, 29, 37, 0.05);
+/*  box-shadow: 0 1px 0 0 rgba(22, 29, 37, 0.05);
+  table-layout: fixed;
+*/
 }
 .Cell {
   border: 1px solid black;
-  padding: 4px;
+/*  padding: 4px; */
   text-align: center;
   font-size: 10px;
-  width: 60px;
 }
 
 /* Hand Section */
@@ -134,18 +135,10 @@ p {
 }
 .ctrl-btn {
     width: 100px;
+    margin: 24px auto 0;
 }
 #newGameBtn {
-/*  display: inline-block; */
-  margin: 30px auto 0;
-}
-#evalBtn {
-/*  display: inline-block; */
-  margin: 40px auto 0;
-}
-#showHandsBtn {
-/*  display: inline-block; */
-  margin: 40px auto 0;
+  margin-top: 5px;
 }
 
 /* Show hand evaluation section */
@@ -176,5 +169,5 @@ footer {
   text-align: center;
   font-size: 6px;
   position: relative;
-  margin: 100px, auto, 0;
+  margin: 100px auto 0;
 }

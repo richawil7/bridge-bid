@@ -11,6 +11,7 @@ import NewGame from "./NewGame.jsx";
 import Status from "./Status.jsx";
 import BidHistory from "./BidHistory.jsx";
 import HandEvalBtn from "./HandEvalBtn.jsx";
+import RebidBtn from "./RebidBtn.jsx";
 import HandEval from "./HandEval.jsx";
 import Position from "./Position.jsx";
 import ShowHands from "./ShowHands.jsx";
@@ -89,6 +90,7 @@ function App() {
               <div className="col-lg-2 control">
                 <NewGame state={state} setFx={setState} setShowHand={setShowHands} setShowEval={setShowEval}/>
                 <HandEvalBtn position={position} setShowFx={setShowEval} setEvalFx={setHandEval}/>
+                <RebidBtn />
                 <ShowHands setFx={setShowHands} />
               </div>
               <div className="col-lg-3">
