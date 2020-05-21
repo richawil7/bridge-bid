@@ -1,6 +1,7 @@
 import React from "react";
 import axios from 'axios';
 import querystring from 'querystring';
+import serverUrl from "./ServerUrl.jsx";
 
 function BidEntry(props) {
 
@@ -15,7 +16,8 @@ function BidEntry(props) {
             var bidStr = document.getElementById("bidId").value;
             console.log("User bid " + bidStr);
             const bidObj = {bid: bidStr};
-            axios.post('http://192.168.1.5:3000/makeBid', querystring.stringify(bidObj));
+	    const url = serverUrl + 'makeBid';
+            axios.post(url, querystring.stringify(bidObj));
           }} >Submit
           </button>
       </div>

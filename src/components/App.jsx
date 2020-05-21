@@ -16,6 +16,7 @@ import HandEval from "./HandEval.jsx";
 import Position from "./Position.jsx";
 import ShowHands from "./ShowHands.jsx";
 import { SSEProvider } from 'react-hooks-sse';
+import serverUrl from "./ServerUrl.jsx";
 
 // Install all of bootstrap
 import 'bootstrap';
@@ -44,8 +45,7 @@ function App() {
   const [showHands, setShowHands] = useState(false);
   const [showEval, setShowEval] = useState(false);
   const [handEval, setHandEval] = useState(undefined);
-  const serverBaseUrl = "http://192.168.1.5:3000/"
-  const serverEventUrl = serverBaseUrl + "sse"
+  const serverEventUrl = serverUrl + "sse"
   var debug = false;
   //const [cookies, setCookie] = useCookies(['position']);
   // setCookie('position', newName, { path: '/' });

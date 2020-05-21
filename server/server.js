@@ -75,6 +75,26 @@ statusMsg = "Waiting on players to sit";
 
 /***** State Machine Event Handlers *****/
 
+function processBid(nextBid) {
+  announceBid(nextBid);
+  // Make this next bid the current bid
+  bid = nextBid;
+  // Add this bid to the history
+  bidHistory.push(nextBid);
+
+  if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
+    passCount++;
+  } else {
+    passCount = 0;    // Make this next bid the current bid
+  }
+  if (passCount < 3) {
+    bidder = bidMgr.getNextPlayer(bidder);
+    getNextBid();
+  } else {
+    statusMsg = "This hand is over. Press new game to play again."
+  }
+}
+
 function getNextBid() {
   // console.log("getNextBid: curBid is " + curBid.level + curBid.suit);
   statusMsg = "Waiting on " + bidder + " to bid";
@@ -86,24 +106,7 @@ function getNextBid() {
     // Asking the computer for a bid
     nextBid = players[bidder].getBid(bid);
     console.log("Computer bid " + nextBid.level + nextBid.suit + " for " + bidder);
-    announceBid(nextBid);
-
-    // Make this next bid the current bid
-    bid = nextBid;
-    // Add this bid to the history
-    bidHistory.push(nextBid);
-
-    if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
-      passCount++;
-    } else {
-      passCount = 0;    // Make this next bid the current bid
-    }
-    if (passCount < 3) {
-      bidder = bidMgr.getNextPlayer(bidder);
-      getNextBid();
-    } else {
-      statusMsg = "This hand is over. Press new game to play again."
-    }
+    processBid(nextBid);
   }
 }
 
@@ -128,24 +131,7 @@ function processHumanBid(bidStr) {
   }
   nextBid = {suit: suit, level: level};
   console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
-  announceBid(nextBid);
-
-  // Make this next bid the current bid
-  bid = nextBid;
-  // Add this bid to the history
-  bidHistory.push(bid);
-
-  if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
-    passCount++;
-  } else {
-    passCount = 0;
-  }
-  if (passCount < 3) {
-    bidder = bidMgr.getNextPlayer(bidder);
-    getNextBid();
-  } else {
-    statusMsg = "This hand is over. Press new game to play again."
-  }
+  processBid(nextBid);
 }
 
 // This endpoint is called by the client to get their hand data

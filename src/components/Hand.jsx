@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import Card from "./Card.jsx";
 import axios from "axios";
+import serverUrl from "./ServerUrl.jsx";
 
 function Hand(props) {
   const [handState, setHandState] = useState({
@@ -9,7 +10,7 @@ function Hand(props) {
   });
 
   useEffect(() => {
-    const url = 'http://192.168.1.5:3000/' + props.position + '/hand'
+    const url = serverUrl + props.position + '/hand'
     axios.get(url)
       .then(response => {
           console.log(response);

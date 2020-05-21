@@ -2,6 +2,7 @@ import React, {useEffect} from "react";
 import axios from 'axios';
 import querystring from 'querystring';
 import getStatus from "./GetStatus.jsx";
+import serverUrl from "./ServerUrl.jsx";
 
 function Position(props) {
   const position = props.position;
@@ -15,7 +16,8 @@ function Position(props) {
     const reqSeat = event.target.dataset.seat;
     console.log("User wants to play for " + reqSeat);
     var seatObj = {seat: reqSeat};
-    axios.post('http://192.168.1.5:3000/sit', querystring.stringify(seatObj))
+    const url = serverUrl + 'sit';
+    axios.post(url, querystring.stringify(seatObj))
     .then((response) => {
       //console.log("Axios got response status " + response.status);
       // console.log("Axios got response text " + response.statusText);

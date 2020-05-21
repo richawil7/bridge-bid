@@ -1,10 +1,12 @@
 import React from "react";
 import axios from 'axios';
+import serverUrl from "./ServerUrl.jsx";
 
 function getStatus(st, setFx) {
   var foundChange = false;
   var changeCount = st.delta;
-  axios.get('http://192.168.1.5:3000/update')
+  const url = serverUrl + 'update';
+  axios.get(url)
       .then(response => {
           // console.log("getStatus: got response");
           if (response.data.message != st.message) {

@@ -1,11 +1,12 @@
 import React from 'react';
 import axios from 'axios';
+import serverUrl from "./ServerUrl.jsx";
 
 function HandEvalBtn(props) {
 
   function clickHandler() {
     // Ask the server for the evaluation for my hand
-    const url = 'http://192.168.1.5:3000/' + props.position + '/eval'
+    const url = serverUrl + props.position + '/eval'
     axios.get(url)
         .then(response => {
             console.log("getHandEval: got response");
