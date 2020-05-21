@@ -75,6 +75,62 @@ statusMsg = "Waiting on players to sit";
 
 /***** State Machine Event Handlers *****/
 
+function takeSeat(reqSeat) {
+  var assignedSeat;
+  var missingPlayer;
+  (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
+  const result = bidMgr.joinPlayer(players, reqSeat, true);
+  if (result) {
+    assignedSeat = reqSeat;
+  } else {
+    console.log("Seat for " + reqSeat + " is already taken");
+    assignedSeat = missingPlayer;
+    bidMgr.joinPlayer(players, missingPlayer, true);
+  }
+
+  if (bidMgr.allPlayers()) {
+    statusMsg = "Waiting on new game request";
+    //console.log("Pushing new player event");
+    emitter.emit('push', 'playerEvent', {
+      value: bidMgr.numPlayers(players)
+    });
+  } else {
+    statusMsg = "Waiting on " + missingPlayer + " to join";
+  }
+  return assignedSeat;
+}
+
+function newGame() {
+  // Ask the bid manager to start a new game
+  bidMgr.newGame(players);
+
+  // Clear any previous bidHistory
+  bidHistory.length = 0;
+
+  // Rotate the Dealer
+  gameNum++;
+  dealer = bidMgr.getNextPlayer(dealer);
+  console.log("Dealer is " + dealer);
+  bidder = dealer;
+  bid = {suit: 'X', level: 0};
+  if (dealer != 'North') {
+    bidHistory.push(bid);
+    if (dealer != 'East') {
+      bidHistory.push(bid);
+      if (dealer != 'South') {
+        bidHistory.push(bid);
+      }
+    }
+  }
+  passCount = -1;
+  statusMsg = "Waiting on " + bidder + " to bid";
+  //console.log("Pushing new game event");
+  emitter.emit('push', 'newGameEvent', {
+    value: gameNum
+  });
+  getNextBid();
+}
+
 function processBid(nextBid) {
   announceBid(nextBid);
   // Make this next bid the current bid
@@ -134,10 +190,37 @@ function processHumanBid(bidStr) {
   processBid(nextBid);
 }
 
+function rebid() {
+  // Clear any previous bidHistory
+  bidHistory.length = 0;
+
+  // Reset the bidder to be the dealer
+  gameNum++;
+  bidder = dealer;
+  bid = {suit: 'X', level: 0};
+  if (dealer != 'North') {
+    bidHistory.push(bid);
+    if (dealer != 'East') {
+      bidHistory.push(bid);
+      if (dealer != 'South') {
+        bidHistory.push(bid);
+      }
+    }
+  }
+  passCount = -1;
+  statusMsg = "Waiting on " + bidder + " to bid";
+  //console.log("Pushing new game event");
+  emitter.emit('push', 'newGameEvent', {
+    value: gameNum
+  });
+  getNextBid();
+}
+
+/***** Endpoint handlers *****/
+
 // This endpoint is called by the client to get their hand data
 app.get("/:position/hand", function(req, res) {
     const position = req.params.position;
-    // const position = 'North';
     console.log("In server get hand for " + position);
 
     // Create an object for holding the data
@@ -157,7 +240,6 @@ app.get("/:position/hand", function(req, res) {
 // This endpoint is called by the client to get their hand evaluation
 app.get("/:position/eval", function(req, res) {
     const position = req.params.position;
-    // const position = 'North';
     console.log("In server get hand evaluation for " + position);
 
     // Create an object for holding the data
@@ -194,91 +276,21 @@ app.post("/makeBid", function(req, res) {
 app.post("/sit", function(req, res) {
   const reqSeat = req.body.seat;
   console.log("Server received sit request from " + reqSeat);
-  var assignedSeat;
-  var missingPlayer;
-  (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
-  const result = bidMgr.joinPlayer(players, reqSeat, true);
-  if (result) {
-    assignedSeat = reqSeat;
-  } else {
-    console.log("Seat for " + reqSeat + " is already taken");
-    assignedSeat = missingPlayer;
-    bidMgr.joinPlayer(players, missingPlayer, true);
-  }
-
-  if (bidMgr.allPlayers()) {
-    statusMsg = "Waiting on new game request";
-    //console.log("Pushing new player event");
-    emitter.emit('push', 'playerEvent', {
-      value: bidMgr.numPlayers(players)
-    });
-  } else {
-    statusMsg = "Waiting on " + missingPlayer + " to join";
-  }
-
+  const assignedSeat = takeSeat(reqSeat);
   res.send(assignedSeat);
 });
 
 // Post handler for starting a new game
 app.post("/newGame", function(req, res) {
   console.log("Server received new game request");
-  bidMgr.newGame(players);
-
-  // Clear any previous bidHistory
-  bidHistory.length = 0;
-
-  // Rotate the Dealer
-  gameNum++;
-  dealer = bidMgr.getNextPlayer(dealer);
-  console.log("Dealer is " + dealer);
-  bidder = dealer;
-  bid = {suit: 'X', level: 0};
-  if (dealer != 'North') {
-    bidHistory.push(bid);
-    if (dealer != 'East') {
-      bidHistory.push(bid);
-      if (dealer != 'South') {
-        bidHistory.push(bid);
-      }
-    }
-  }
-  passCount = -1;
-  statusMsg = "Waiting on " + bidder + " to bid";
-  //console.log("Pushing new game event");
-  emitter.emit('push', 'newGameEvent', {
-    value: gameNum
-  });
-  getNextBid();
+  newGame();
   res.send('OK');
 });
 
 // Post handler for rebidding the current hand
 app.post("/rebid", function(req, res) {
   console.log("Server received rebid request");
-
-  // Clear any previous bidHistory
-  bidHistory.length = 0;
-
-  // Reset the bidder to be the dealer
-  gameNum++;
-  bidder = dealer;
-  bid = {suit: 'X', level: 0};
-  if (dealer != 'North') {
-    bidHistory.push(bid);
-    if (dealer != 'East') {
-      bidHistory.push(bid);
-      if (dealer != 'South') {
-        bidHistory.push(bid);
-      }
-    }
-  }
-  passCount = -1;
-  statusMsg = "Waiting on " + bidder + " to bid";
-  //console.log("Pushing new game event");
-  emitter.emit('push', 'newGameEvent', {
-    value: gameNum
-  });
-  getNextBid();
+  rebid();
   res.send('OK');
 });
 
