@@ -13,6 +13,7 @@ import BidHistory from "./BidHistory.jsx";
 import HandEvalBtn from "./HandEvalBtn.jsx";
 import RebidBtn from "./RebidBtn.jsx";
 import HandEval from "./HandEval.jsx";
+import EndGameBtn from "./EndGameBtn.jsx";
 import Position from "./Position.jsx";
 import ShowHands from "./ShowHands.jsx";
 import { SSEProvider } from 'react-hooks-sse';
@@ -92,6 +93,7 @@ function App() {
                 <HandEvalBtn position={position} setShowFx={setShowEval} setEvalFx={setHandEval}/>
                 <RebidBtn />
                 <ShowHands setFx={setShowHands} />
+                <EndGameBtn />
               </div>
               <div className="col-lg-3">
                 <HandEval showEval={showEval} handEval={handEval} />

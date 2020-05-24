@@ -69,7 +69,7 @@ exports.init = function() {
 
 /***** Helper Functions *****/
 
-function getNextBid(table) {
+function getNextBid(table, port) {
   table.statusMsg = "Waiting on " + table.bidder + " to bid";
   // Find the player who is supposed to bid next
   var index = -1;
@@ -87,8 +87,8 @@ function getNextBid(table) {
     // console.log("Computer bid " + nextBid.level + nextBid.suit + " for " + table.bidder);
     const bidStr = Number(nextBid.level) + nextBid.suit;
     const bidObj = {bid: bidStr, position: table.bidder};
-    // FIX ME
-    const url = 'http://localhost:3000/makeBid';
+    const url = 'http://localhost:' + port.toString() + '/makeBid';
+    //const url = 'http://localhost:3000/makeBid';
     axios.post(url, querystring.stringify(bidObj));
     // processBid(0, table, nextBid);
   }
@@ -243,7 +243,7 @@ exports.joinPlayer = function(tableId, reqSeat, isHuman, callback, res) {
   });
 }
 
-exports.newGame = function(tableId, rebid, callback, res) {
+exports.newGame = function(tableId, rebid, port, callback, res) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
   // Get the table from the database
   TableModel.findOne({index: tableId}, function(err, table) {
@@ -284,7 +284,7 @@ exports.newGame = function(tableId, rebid, callback, res) {
       promise
       .then(function(result) {
         callback(err, table.gameNum, res);
-        getNextBid(table);
+        getNextBid(table, port);
       })
       .catch(function(err) {
         console.log("newGame got error " + err);
@@ -343,8 +343,13 @@ exports.getHandEval = function(tableId, position, callback, res) {
 }
 
 
-function processBid(tableId, table, nextBid, callback) {
-  function internalProcessBid(table, nextBid) {
+function processBid(tableId, table, nextBid, port, callback, bidder) {
+  function internalProcessBid(table, nextBid, bidder) {
+    // Did we get the expected bidder
+    if (table.bidder !== bidder) {
+      console.log("tableDB processBid: expected bidder " + table.bidder + ", got " + bidder);
+      return;
+    }
     table.bid = nextBid;
     table.bidHistory.push(nextBid);
     if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
@@ -363,7 +368,7 @@ function processBid(tableId, table, nextBid, callback) {
     .then(function(result) {
       callback(null, nextBid);
       if (table.passCount < 3) {
-        getNextBid(table);
+        getNextBid(table, port);
       }
     })
     .catch(function(err) {
@@ -382,11 +387,24 @@ function processBid(tableId, table, nextBid, callback) {
           callback(err, 0, res);
           return;
         }
-        internalProcessBid(table, nextBid);
+        internalProcessBid(table, nextBid, bidder);
       });
   } else {
-    internalProcessBid(table, nextBid);
+    internalProcessBid(table, nextBid, bidder);
   }
+}
+
+exports.endGame = function(tableId) {
+  // rebid parameter is a boolean. If true, means we want to rebid the existing hand
+  // Get the table from the database
+  TableModel.deleteOne({index: tableId}, function(err, result) {
+      if (err) {
+        console.log("endGame deleteOne: got error " + err);
+        return;
+      }
+      console.log("tableDB endGame: closed table " + tableId + " result: " + result);
+    }
+  )
 }
 
 exports.processBid = processBid;

@@ -135,10 +135,10 @@ p {
 }
 .ctrl-btn {
     width: 100px;
-    margin: 24px auto 0;
+    margin: 10px auto 0;
 }
 #newGameBtn {
-  margin-top: 5px;
+  margin-top: 20px;
 }
 
 /* Show hand evaluation section */

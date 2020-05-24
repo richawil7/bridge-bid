@@ -57,16 +57,10 @@ var statusMsg = "Uninitialized";
 bidMgr.init();
 tableDB.init();
 
-// Create a single table for now
+// FIX ME  Create a single table for now
 const tblIdx = 1;
 tableDB.createTable(tblIdx);
 
-// Create players for East and West, as they are played by the Server
-// tableDB.joinPlayer(tblIdx, 'East', false);
-// tableDB.joinPlayer(tblIdx, 'West', false);
-// FIX ME
-// tableDB.joinPlayer(tblIdx, 'South', false);
-// tableDB.joinPlayer(tblIdx, 'North', true);
 
 /***** State Machine Event Handlers *****/
 
@@ -77,11 +71,11 @@ function processBidCallback(err, newBid) {
   // console.log("announcing bid " + bidStr);
   bidState.lastBid = bidStr;
   bidState.count++;
+  // console.log("processBidCallback: bid " + bidStr + " from " + bidder);
   // console.log("Pushing new bid event");
   emitter.emit('push', 'bidStream', {
     value: bidState.count,
   });
-
 }
 
 function processBid(bidStr, bidder) {
@@ -106,7 +100,7 @@ function processBid(bidStr, bidder) {
   nextBid = {suit: suit, level: level};
 
   //console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
-  tableDB.processBid(tblIdx, null, nextBid, processBidCallback);
+  tableDB.processBid(tblIdx, null, nextBid, port, processBidCallback, bidder);
 }
 
 /***** Endpoint handlers *****/
@@ -222,7 +216,7 @@ function newGameCallback(err, gameNum, res) {
 app.post("/newGame", function(req, res) {
   console.log("Server received new game request");
   // Ask the table database to start a new game
-  tableDB.newGame(tblIdx, false, newGameCallback, res);
+  tableDB.newGame(tblIdx, false, port, newGameCallback, res);
 });
 
 
@@ -230,9 +224,16 @@ app.post("/newGame", function(req, res) {
 // Post handler for rebidding the current hand
 app.post("/rebid", function(req, res) {
   console.log("Server received rebid request");
-  tableDB.newGame(tblIdx, true, newGameCallback, res);
+  tableDB.newGame(tblIdx, true, port, newGameCallback, res);
 });
 
+// Post handler for ending a session
+app.post("/endGame", function(req, res) {
+  console.log("Server received end game request");
+  // Ask the table database to clean up this table
+  tableDB.endGame(tblIdx);
+  res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
+});
 
 // Home page
 app.use('/', function(req, res) {
@@ -240,7 +241,7 @@ app.use('/', function(req, res) {
 });
 
 // Set up a port for the server to listen on
-let port = process.env.PORT;
+var port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000; // localhost:3000
 };
