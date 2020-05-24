@@ -22,7 +22,7 @@ function BidGrid(props) {
         ( <div className='bidEntry'>
             <h3>Enter A Bid</h3>
             <div className='bidGrid'>
-              <DataTable headings={headings} rows={bids} />
+              <DataTable headings={headings} rows={bids} position={props.position} />
             </div>
           </div>
         ) : (null)

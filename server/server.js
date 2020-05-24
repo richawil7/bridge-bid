@@ -1,5 +1,6 @@
 // jshint esversion:6
 const bidMgr = require(__dirname + "/bidMgr.js");
+const tableDB = require(__dirname + "/tableDB.js");
 const path = require('path');
 const express = require("express", "4.17.1");
 const app = express();
@@ -40,19 +41,8 @@ app.get('/sse', (req, res) => {
   });
 });
 
-function announceBid(newBid) {
-  const bidStr = newBid.level.toString() + newBid.suit;
-  // console.log("announcing bid " + bidStr);
-  bidState.lastBid = bidStr;
-  bidState.count++;
-  //console.log("Pushing new bid event");
-  emitter.emit('push', 'bidStream', {
-    value: bidState.count,
-  });
-}
 
-
-/***** Global objects *****/
+/***** Global objects *****
 var players = [];
 var gameNum = 0;
 var dealer = 'North';
@@ -61,112 +51,40 @@ var bid;
 var passCount;
 var bidHistory = [];
 var statusMsg = "Uninitialized";
+*/
 
 /***** Initialization *****/
 bidMgr.init();
+tableDB.init();
+
+// Create a single table for now
+const tblIdx = 1;
+tableDB.createTable(tblIdx);
 
 // Create players for East and West, as they are played by the Server
-bidMgr.joinPlayer(players, 'East', false);
-bidMgr.joinPlayer(players, 'West', false);
+// tableDB.joinPlayer(tblIdx, 'East', false);
+// tableDB.joinPlayer(tblIdx, 'West', false);
 // FIX ME
-bidMgr.joinPlayer(players, 'South', false);
-// bidMgr.joinPlayer(players, 'North', true);
-statusMsg = "Waiting on players to sit";
+// tableDB.joinPlayer(tblIdx, 'South', false);
+// tableDB.joinPlayer(tblIdx, 'North', true);
 
 /***** State Machine Event Handlers *****/
 
-function takeSeat(reqSeat) {
-  var assignedSeat;
-  var missingPlayer;
-  (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
-  const result = bidMgr.joinPlayer(players, reqSeat, true);
-  if (result) {
-    assignedSeat = reqSeat;
-  } else {
-    console.log("Seat for " + reqSeat + " is already taken");
-    assignedSeat = missingPlayer;
-    bidMgr.joinPlayer(players, missingPlayer, true);
-  }
-
-  if (bidMgr.allPlayers()) {
-    statusMsg = "Waiting on new game request";
-    //console.log("Pushing new player event");
-    emitter.emit('push', 'playerEvent', {
-      value: bidMgr.numPlayers(players)
-    });
-  } else {
-    statusMsg = "Waiting on " + missingPlayer + " to join";
-  }
-  return assignedSeat;
-}
-
-function newGame() {
-  // Ask the bid manager to start a new game
-  bidMgr.newGame(players);
-
-  // Clear any previous bidHistory
-  bidHistory.length = 0;
-
-  // Rotate the Dealer
-  gameNum++;
-  dealer = bidMgr.getNextPlayer(dealer);
-  console.log("Dealer is " + dealer);
-  bidder = dealer;
-  bid = {suit: 'X', level: 0};
-  if (dealer != 'North') {
-    bidHistory.push(bid);
-    if (dealer != 'East') {
-      bidHistory.push(bid);
-      if (dealer != 'South') {
-        bidHistory.push(bid);
-      }
-    }
-  }
-  passCount = -1;
-  statusMsg = "Waiting on " + bidder + " to bid";
-  //console.log("Pushing new game event");
-  emitter.emit('push', 'newGameEvent', {
-    value: gameNum
+/* Bid Processing */
+function processBidCallback(err, newBid) {
+  // Announce the bid
+  const bidStr = newBid.level.toString() + newBid.suit;
+  // console.log("announcing bid " + bidStr);
+  bidState.lastBid = bidStr;
+  bidState.count++;
+  // console.log("Pushing new bid event");
+  emitter.emit('push', 'bidStream', {
+    value: bidState.count,
   });
-  getNextBid();
+
 }
 
-function processBid(nextBid) {
-  announceBid(nextBid);
-  // Make this next bid the current bid
-  bid = nextBid;
-  // Add this bid to the history
-  bidHistory.push(nextBid);
-
-  if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
-    passCount++;
-  } else {
-    passCount = 0;    // Make this next bid the current bid
-  }
-  if (passCount < 3) {
-    bidder = bidMgr.getNextPlayer(bidder);
-    getNextBid();
-  } else {
-    statusMsg = "This hand is over. Press new game to play again."
-  }
-}
-
-function getNextBid() {
-  // console.log("getNextBid: curBid is " + curBid.level + curBid.suit);
-  statusMsg = "Waiting on " + bidder + " to bid";
-  if (players[bidder].isHuman) {
-    console.log("Human turn");
-    // nextBid = players[curBidder].getBid(curBid);
-    // console.log("Human bid " + nextBid.level + nextBid.suit + " for " + curBidder);
-  } else {
-    // Asking the computer for a bid
-    nextBid = players[bidder].getBid(bid);
-    console.log("Computer bid " + nextBid.level + nextBid.suit + " for " + bidder);
-    processBid(nextBid);
-  }
-}
-
-function processHumanBid(bidStr) {
+function processBid(bidStr, bidder) {
   var level;
   var suit;
   const levelChar = bidStr.charAt(0);
@@ -186,112 +104,133 @@ function processHumanBid(bidStr) {
     }
   }
   nextBid = {suit: suit, level: level};
-  console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
-  processBid(nextBid);
-}
 
-function rebid() {
-  // Clear any previous bidHistory
-  bidHistory.length = 0;
-
-  // Reset the bidder to be the dealer
-  gameNum++;
-  bidder = dealer;
-  bid = {suit: 'X', level: 0};
-  if (dealer != 'North') {
-    bidHistory.push(bid);
-    if (dealer != 'East') {
-      bidHistory.push(bid);
-      if (dealer != 'South') {
-        bidHistory.push(bid);
-      }
-    }
-  }
-  passCount = -1;
-  statusMsg = "Waiting on " + bidder + " to bid";
-  //console.log("Pushing new game event");
-  emitter.emit('push', 'newGameEvent', {
-    value: gameNum
-  });
-  getNextBid();
+  //console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
+  tableDB.processBid(tblIdx, null, nextBid, processBidCallback);
 }
 
 /***** Endpoint handlers *****/
 
+// Get Dealt Hand Handling
+function getHandCallback(err, cards, res) {
+  // cards is an array of card objects
+  var jsonStr;
+  if (err) {
+    console.log("getHandCallback error: " + err);
+    jsonStr = JSON.stringify([]);
+  } else {
+    jsonStr = JSON.stringify(cards);
+  }
+  res.send(jsonStr);
+}
 // This endpoint is called by the client to get their hand data
 app.get("/:position/hand", function(req, res) {
     const position = req.params.position;
     console.log("In server get hand for " + position);
-
-    // Create an object for holding the data
-    var cardsInHand = [];
-    if ((players[position] != undefined) && (players[position].hand != undefined)) {
-      console.log("Server has valid hand for " + position);
-      players[position].hand.handCards.forEach(function(card) {
-        let aCard = {suit: card.suit, value: card.value};
-        cardsInHand.push(aCard);
-      });
-    }
-
-    const jsonStr = JSON.stringify(cardsInHand);
-    res.send(jsonStr);
+    tableDB.getHand(tblIdx, position, getHandCallback, res);
 });
 
+
+// Get Hand Evaluation Handling
+function getEvalCallback(err, handEval, res) {
+  // handEval is an object
+  const jsonStr = JSON.stringify(handEval);
+  res.send(jsonStr);
+}
 // This endpoint is called by the client to get their hand evaluation
 app.get("/:position/eval", function(req, res) {
     const position = req.params.position;
     console.log("In server get hand evaluation for " + position);
-
-    // Create an object for holding the data
-    const handEvaluation = bidMgr.getHandEval(players, position);
-    const jsonStr = JSON.stringify(handEvaluation);
-    res.send(jsonStr);
+    tableDB.getHandEval(tblIdx, position, getEvalCallback, res);
 });
+
+
+// Get Table Status Handling
+function updateCallback(err, result, res) {
+  if (err) {
+    console.log("updateCallback: got error " + err);
+    return;
+  }
+  // console.log("In server update updateCallback");
+  // Create an object for holding the status
+  var status = {
+    message: result.statusMsg,
+    bidder: result.bidder,
+    bidHistory: result.bidHistory,
+    gameNum: result.gameNum,
+    dealer: result.dealer
+  };
+
+  const jsonStr = JSON.stringify(status);
+  res.send(jsonStr);
+}
 
 // This endpoint is called by the client to get game status
 app.get("/update", function(req, res) {
-    // console.log("In server update handler");
-    // Create an object for holding the status
-    var status = {
-      message: statusMsg,
-      bidder: bidder,
-      bidHistory: bidHistory,
-      gameNum: gameNum,
-      dealer: dealer
-    };
-
-    const jsonStr = JSON.stringify(status);
-    res.send(jsonStr);
+    tableDB.getTable(tblIdx, updateCallback, res);
 });
 
+// New Bid Handling
 // Post handler for player submitting a bid
 app.post("/makeBid", function(req, res) {
   const bid = req.body.bid;
-  console.log("Server received bid " + bid);
-  processHumanBid(bid);
+  const position = req.body.position;
+  console.log("Server received bid " + bid + " from " + position);
+  processBid(bid, position);
   res.sendStatus(200);
 });
+
+// New Player Handling
+function takeSeatCallback(err, result, res) {
+  if (err) {
+    console.log("takeSeatCallback: got error " + err);
+    return;
+  }
+  // result is an object boolean indicating if all players are sitting at the table
+  // and the assigned seat
+  if (result.allPlayersJoined) {
+    emitter.emit('push', 'playerEvent', {
+      value: 4
+    });
+  }
+  res.send(result.assignedSeat);
+}
 
 // Post handler to add a new player
 app.post("/sit", function(req, res) {
   const reqSeat = req.body.seat;
   console.log("Server received sit request from " + reqSeat);
-  const assignedSeat = takeSeat(reqSeat);
-  res.send(assignedSeat);
+  tableDB.joinPlayer(tblIdx, reqSeat, true, takeSeatCallback, res);
 });
+
+
+// New Game Handling
+function newGameCallback(err, gameNum, res) {
+  if (err) {
+    console.log("newGameCallback: got error " + err);
+    return;
+  }
+  // result is the game Number
+  //console.log("Pushing new game event");
+  emitter.emit('push', 'newGameEvent', {
+    value: gameNum
+  });
+  res.send('OK');
+}
 
 // Post handler for starting a new game
 app.post("/newGame", function(req, res) {
   console.log("Server received new game request");
-  newGame();
-  res.send('OK');
+  // Ask the table database to start a new game
+  tableDB.newGame(tblIdx, false, newGameCallback, res);
 });
 
+
+// Rebid Handling
 // Post handler for rebidding the current hand
 app.post("/rebid", function(req, res) {
   console.log("Server received rebid request");
-  rebid();
-  res.send('OK');
+  tableDB.newGame(tblIdx, true, newGameCallback, res);
 });
 
 

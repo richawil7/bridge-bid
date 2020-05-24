@@ -15,7 +15,7 @@ function BidEntry(props) {
             // I want to see what the user entered
             var bidStr = document.getElementById("bidId").value;
             console.log("User bid " + bidStr);
-            const bidObj = {bid: bidStr};
+            const bidObj = {bid: bidStr, position: props.position};
 	    const url = serverUrl + 'makeBid';
             axios.post(url, querystring.stringify(bidObj));
           }} >Submit

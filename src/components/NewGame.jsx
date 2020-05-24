@@ -28,11 +28,12 @@ function NewGame(props) {
     props.setShowHand(false);
     // Disable show hand Evaluation
     props.setShowEval(false);
-
+/*
     setTimeout(function() {
       // props.setFx({...props.state, gameNum: newGameNum});
       getStatus(props.state, props.setFx);
     }, delayTime);
+*/
   }
 
   {return (

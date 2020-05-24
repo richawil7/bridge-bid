@@ -12,23 +12,37 @@ const handModule = require(__dirname + "/hand.js");
 // Require the player module
 const playerModule = require(__dirname + "/player.js");
 
+function getPlayer(players, position) {
+  var foundPlayer = null;
+  for (let i=0; i<4; i++) {
+    if (players[i].position === position) {
+      foundPlayer =  players[i];
+      break;
+    }
+  };
+  return foundPlayer;
+}
 
 function assignHandsToPlayers(hands, players) {
   var handIndex;
+  const north = getPlayer(players, "North");
+  const east = getPlayer(players, "East");
+  const south = getPlayer(players, "South");
+  const west = getPlayer(players, "West");
   for (handIndex = 0; handIndex < 4; handIndex++) {
     hands[handIndex].player = null;
   }
-  players['North'].hand = null;
-  players['East'].hand = null;
-  players['South'].hand = null;
-  players['West'].hand = null;
+  north.hand.handCards.length = 0;
+  east.hand.handCards.length = 0;
+  south.hand.handCards.length = 0;
+  west.hand.handCards.length = 0;
 
   // Give the first non-pass hand to North
   handIndex = 0;
   do {
     if (hands[handIndex].openingBid.level != 0) {
-      players['North'].hand = hands[handIndex];
-      hands[handIndex].player = players['North'];
+      north.hand = hands[handIndex];
+      hands[handIndex].player = 'North';
       // console.log("North got hand " + handIndex);
       break;
     }
@@ -38,19 +52,19 @@ function assignHandsToPlayers(hands, players) {
   if (handIndex === 4) {
     // console.log("All passes ");
     // We had no opening bids. Give North the first hand
-    players['North'].hand = hands[0];
-    hands[0].player = players['North'];
+    north.hand = hands[0];
+    hands[0].player = 'North';
 
     // We had no opening bids. Give South the last hand
-    players['South'].hand = hands[3];
-    hands[3].player = players['South'];
+    south.hand = hands[3];
+    hands[3].player = 'South';
 
     // Assign the last 2 handCards
-    players['East'].hand = hands[1];
-    hands[1].player = players['East'];
+    east.hand = hands[1];
+    hands[1].player = 'East';
 
-    players['West'].hand = hands[2];
-    hands[2].player = players['West'];
+    west.hand = hands[2];
+    hands[2].player = 'West';
     return;
   }
 
@@ -58,8 +72,8 @@ function assignHandsToPlayers(hands, players) {
   handIndex++;
   while (handIndex < 4) {
     if (hands[handIndex].openingBid.level != 0) {
-      players['South'].hand = hands[handIndex];
-      hands[handIndex].player = players['South'];
+      south.hand = hands[handIndex];
+      hands[handIndex].player = 'South';
       // console.log("South got hand " + handIndex);
       break;
     }
@@ -68,14 +82,14 @@ function assignHandsToPlayers(hands, players) {
   if (handIndex === 4) {
     // console.log("No more non-pass hands for South");
     // We had no more opening bids. Give South the first hand
-    players['South'].hand = hands[0];
-    hands[0].player = players['South'];
+    south.hand = hands[0];
+    hands[0].player = 'South';
 
-    players['East'].hand = hands[1];
-    hands[1].player = players['East'];
+    east.hand = hands[1];
+    hands[1].player = 'East';
 
-    players['West'].hand = hands[2];
-    hands[2].player = players['West'];
+    west.hand = hands[2];
+    hands[2].player = 'West';
     return;
   }
 
@@ -83,8 +97,8 @@ function assignHandsToPlayers(hands, players) {
   handIndex = 0;
   while (handIndex < 4) {
     if (hands[handIndex].player === null) {
-      players['East'].hand = hands[handIndex];
-      hands[handIndex].player = players['East'];
+      east.hand = hands[handIndex];
+      hands[handIndex].player = 'East';
       // console.log("East got hand " + handIndex);
       handIndex++;
       break;
@@ -93,8 +107,8 @@ function assignHandsToPlayers(hands, players) {
   }
   while (handIndex < 4) {
     if (hands[handIndex].player === null) {
-      players['West'].hand = hands[handIndex];
-      hands[handIndex].player = players['West'];
+      west.hand = hands[handIndex];
+      hands[handIndex].player = 'West';
       // console.log("West got hand " + handIndex);
       break;
     }
@@ -103,64 +117,18 @@ function assignHandsToPlayers(hands, players) {
   return;
 }
 
-function numPlayers(players) {
-  var count = 0;
-  if (players['North'] != null) {
-    count++;
-  }
-  if (players['East'] != null) {
-    count++;
-  }
-  if (players['South'] != null) {
-    count++;
-  }
-  if (players['West'] != null) {
-    count++;
-  }
-  return count;
-}
-
 /********************************************************************/
-
-// Global objects
-var allPlayersJoined;
 
 // Exported Functions
 
 function init() {
   console.log("Bid manager init");
-  allPlayersJoined = false;
 
   // Get a deck of cards
   deck.createDeck();
 }
 
-function joinPlayer(players, position, isHuman) {
-  // Check if this player already exists
-  if (players[position] == null) {
-    players[position] = new playerModule.Player(position, isHuman);
-  } else {
-    console.log("Already have a player sitting at " + position);
-    return false;
-  }
-
-  // Check how many players we have at the table
-  var playerCount = numPlayers(players);
-  console.log("You have " + playerCount + " players");
-  if (playerCount == 4) {
-    console.log("All players have joined");
-    allPlayersJoined = true;
-    // console.log(players);
-  }
-  return true;
-}
-
-function newGame(players) {
-  if (!allPlayersJoined) {
-    console.log("Cannot start a game without all the players");
-    return;
-  }
-
+function dealCards(players) {
   // Deal the cards
   var dealtHands = [];
   var bridgeHands = [];
@@ -185,39 +153,16 @@ function newGame(players) {
 }
 
 function getHandEval(players, position) {
-  if (players[position] != null) {
-    return (handModule.getHandEval(players[position].hand));
-  } else {
-    return null;
+  // Find the player in the players array
+  for (let i=0; i<4; i++) {
+    if (players[i].position === position) {
+      return (handModule.getHandEval(players[i].hand));
+    }
   }
+  return null;
 }
 
-function quitPlayer(players, position) {
-  if (players[position] != null) {
-    players[position] = null;
-  }
-  if (players['East'] != null) {
-    players['East'] = null;
-  }
-  if (players['West'] != null) {
-    players['West'] = null;
-  }
-}
-
-function getNextPlayer(player) {
-  return playerModule.getNextPlayer(player);
-}
-
-function allPlayers() {
-  return allPlayersJoined;
-}
 
 exports.init = init;
-exports.joinPlayer = joinPlayer;
-exports.newGame = newGame;
-exports.quitPlayer = quitPlayer;
-exports.getNextPlayer = getNextPlayer;
-
-exports.allPlayers = allPlayers;
-exports.numPlayers = numPlayers;
+exports.dealCards = dealCards;
 exports.getHandEval = getHandEval;

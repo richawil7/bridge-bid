@@ -6,12 +6,14 @@ import serverUrl from "./ServerUrl.jsx";
 export default function Cell({
   content,
   header,
+  position
 }) {
 
   function bidSelected(event) {
     const bid = event.target.dataset.bid;
+    const position = event.target.dataset.pos;
     console.log("User bids " + bid);
-    const bidObj = {bid: bid};
+    const bidObj = {bid: bid, position: position};
     const url = serverUrl + 'makeBid';
     axios.post(url, querystring.stringify(bidObj));
   }
@@ -21,7 +23,7 @@ export default function Cell({
       {content}
     </th>
   ) : (
-    <td className="Cell" data-bid={content} onClick={bidSelected} >
+    <td className="Cell" data-bid={content} data-pos={position} onClick={bidSelected} >
       {content}
     </td>
   );

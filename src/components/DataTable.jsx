@@ -24,6 +24,7 @@ export default class DataTable extends React.Component {
             <Cell
               key={`${rowIndex}-${cellIndex}`}
               content={rows[rowIndex][cellIndex]}
+              position={this.props.position}
             />
           )
         })}
