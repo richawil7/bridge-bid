@@ -44,13 +44,14 @@ const playerSchema = new mongoose.Schema({
 
 // Define a schema for a bridge table
 const tableSchema = new mongoose.Schema({
-  index: Number,
+  name: String,
   players: [playerSchema],
   gameNum: Number,
   dealer: String,
   bidder: String,
   bid: bidSchema,
   passCount: Number,
+  bidCount: Number,
   bidHistory: [bidSchema],
   statusMsg: String
 });
@@ -96,11 +97,9 @@ function getNextBid(table, port) {
 
 /***** Database Operations *****/
 
-exports.createTable = function(tableIndex) {
+exports.createTable = function(tableName) {
   // See if this table already exists
-  TableModel.findOne({
-    index: tableIndex
-  }, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("createTable find: got error " + err);
       return;
@@ -144,7 +143,7 @@ exports.createTable = function(tableIndex) {
                player: 'South'}
       };
       const table = new TableModel({
-        index: tableIndex,
+        name: tableName,
         players: [east, west, south],
         allPlayersJoined: false,
         gameNum: 0,
@@ -152,6 +151,7 @@ exports.createTable = function(tableIndex) {
         bidder: 'North',
         bid: {level: 0, suit: 'C'},
         passCount: 0,
+        bidCount: 0,
         bidHistory: [],
         statusMsg: 'Table created. Waiting for players to sit'
       });
@@ -161,11 +161,9 @@ exports.createTable = function(tableIndex) {
   });
 }
 
-exports.getTable = function(tableId, callback, res) {
+exports.getTable = function(tableName, callback, res) {
   // Get the table from the database
-  TableModel.findOne({
-    index: tableId
-  }, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("getTable findOne: got error " + err);
       return;
@@ -175,15 +173,13 @@ exports.getTable = function(tableId, callback, res) {
 }
 
 
-exports.joinPlayer = function(tableId, reqSeat, isHuman, callback, res) {
+exports.joinPlayer = function(tableName, reqSeat, isHuman, callback, res) {
   var assignedSeat = null;
   var missingPlayer;
   (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
 
   // Get the table from the database
-  TableModel.findOne({
-    index: tableId
-  }, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("joinPlayer findOne: got error " + err);
       callback(err, null);
@@ -243,10 +239,10 @@ exports.joinPlayer = function(tableId, reqSeat, isHuman, callback, res) {
   });
 }
 
-exports.newGame = function(tableId, rebid, port, callback, res) {
+exports.newGame = function(tableName, rebid, port, callback, res) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
   // Get the table from the database
-  TableModel.findOne({index: tableId}, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
       if (err) {
         console.log("newGame findOne: got error " + err);
         callback(err, 0, res);
@@ -266,7 +262,7 @@ exports.newGame = function(tableId, rebid, port, callback, res) {
           }
         }
       }
-      TableModel.updateOne({index: tableId}, { $set: {bidHistory: newHistory }},  {multi:true},
+      TableModel.updateOne({name: tableName}, { $set: {bidHistory: newHistory }},  {multi:true},
         function(err, affected) {
           console.log('Clear bidHistory result: ', affected);
         }
@@ -293,11 +289,9 @@ exports.newGame = function(tableId, rebid, port, callback, res) {
     });
 }
 
-exports.getHand = function(tableId, position, callback, res) {
+exports.getHand = function(tableName, position, callback, res) {
   // Get the table from the database
-  TableModel.findOne({
-    index: tableId
-  }, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("getHand findOne: got error " + err);
       callback(err, null, res);
@@ -320,16 +314,14 @@ exports.getHand = function(tableId, position, callback, res) {
         return;
       }
     }
-    const err2 = "Did not find hand for " + position + " at table " + tableId;
+    const err2 = "Did not find hand for " + position + " at table " + tableName;
     callback(err2, null, res);
   });
 }
 
-exports.getHandEval = function(tableId, position, callback, res) {
+exports.getHandEval = function(tableName, position, callback, res) {
   // Get the table from the database
-  TableModel.findOne({
-    index: tableId
-  }, function(err, table) {
+  TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("getHand findOne: got error " + err);
       callback(err, null, res);
@@ -343,13 +335,14 @@ exports.getHandEval = function(tableId, position, callback, res) {
 }
 
 
-function processBid(tableId, table, nextBid, port, callback, bidder) {
+function processBid(tableName, table, nextBid, port, callback, bidder) {
   function internalProcessBid(table, nextBid, bidder) {
     // Did we get the expected bidder
     if (table.bidder !== bidder) {
       console.log("tableDB processBid: expected bidder " + table.bidder + ", got " + bidder);
       return;
     }
+    table.bidCount++;
     table.bid = nextBid;
     table.bidHistory.push(nextBid);
     if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
@@ -366,7 +359,7 @@ function processBid(tableId, table, nextBid, port, callback, bidder) {
     const promise = table.save();
     promise
     .then(function(result) {
-      callback(null, nextBid);
+      callback(null, table.bidCount);
       if (table.passCount < 3) {
         getNextBid(table, port);
       }
@@ -379,9 +372,7 @@ function processBid(tableId, table, nextBid, port, callback, bidder) {
 
   if (table == null) {
     // Get the table from the database
-    TableModel.findOne({
-        index: tableId
-      }, function(err, table) {
+    TableModel.findOne({name: tableName}, function(err, table) {
         if (err) {
           console.log("processBid findOne: got error " + err);
           callback(err, 0, res);
@@ -394,15 +385,15 @@ function processBid(tableId, table, nextBid, port, callback, bidder) {
   }
 }
 
-exports.endGame = function(tableId) {
+exports.endGame = function(tableName) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
   // Get the table from the database
-  TableModel.deleteOne({index: tableId}, function(err, result) {
+  TableModel.deleteOne({name: tableName}, function(err, result) {
       if (err) {
         console.log("endGame deleteOne: got error " + err);
         return;
       }
-      console.log("tableDB endGame: closed table " + tableId + " result: " + result);
+      console.log("tableDB endGame: closed table " + tableName + " result: " + result);
     }
   )
 }

@@ -16,11 +16,6 @@ const cors = require('cors');
 const emitter = new EventEmitter();
 app.use(cors());
 
-const bidState = {
-  lastBid: '0C',
-  count: 0
-};
-
 app.get('/sse', (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -58,23 +53,18 @@ bidMgr.init();
 tableDB.init();
 
 // FIX ME  Create a single table for now
-const tblIdx = 1;
-tableDB.createTable(tblIdx);
+const tblName = "tbl1";
+tableDB.createTable(tblName);
 
 
 /***** State Machine Event Handlers *****/
 
 /* Bid Processing */
-function processBidCallback(err, newBid) {
-  // Announce the bid
-  const bidStr = newBid.level.toString() + newBid.suit;
-  // console.log("announcing bid " + bidStr);
-  bidState.lastBid = bidStr;
-  bidState.count++;
-  // console.log("processBidCallback: bid " + bidStr + " from " + bidder);
+function processBidCallback(err, bidCount) {
   // console.log("Pushing new bid event");
+  // Announce a new bid was received
   emitter.emit('push', 'bidStream', {
-    value: bidState.count,
+    value: bidCount,
   });
 }
 
@@ -100,7 +90,7 @@ function processBid(bidStr, bidder) {
   nextBid = {suit: suit, level: level};
 
   //console.log("Human bid " + nextBid.level + nextBid.suit + " for " + bidder);
-  tableDB.processBid(tblIdx, null, nextBid, port, processBidCallback, bidder);
+  tableDB.processBid(tblName, null, nextBid, port, processBidCallback, bidder);
 }
 
 /***** Endpoint handlers *****/
@@ -121,7 +111,7 @@ function getHandCallback(err, cards, res) {
 app.get("/:position/hand", function(req, res) {
     const position = req.params.position;
     console.log("In server get hand for " + position);
-    tableDB.getHand(tblIdx, position, getHandCallback, res);
+    tableDB.getHand(tblName, position, getHandCallback, res);
 });
 
 
@@ -135,7 +125,7 @@ function getEvalCallback(err, handEval, res) {
 app.get("/:position/eval", function(req, res) {
     const position = req.params.position;
     console.log("In server get hand evaluation for " + position);
-    tableDB.getHandEval(tblIdx, position, getEvalCallback, res);
+    tableDB.getHandEval(tblName, position, getEvalCallback, res);
 });
 
 
@@ -161,7 +151,7 @@ function updateCallback(err, result, res) {
 
 // This endpoint is called by the client to get game status
 app.get("/update", function(req, res) {
-    tableDB.getTable(tblIdx, updateCallback, res);
+    tableDB.getTable(tblName, updateCallback, res);
 });
 
 // New Bid Handling
@@ -194,7 +184,7 @@ function takeSeatCallback(err, result, res) {
 app.post("/sit", function(req, res) {
   const reqSeat = req.body.seat;
   console.log("Server received sit request from " + reqSeat);
-  tableDB.joinPlayer(tblIdx, reqSeat, true, takeSeatCallback, res);
+  tableDB.joinPlayer(tblName, reqSeat, true, takeSeatCallback, res);
 });
 
 
@@ -216,7 +206,7 @@ function newGameCallback(err, gameNum, res) {
 app.post("/newGame", function(req, res) {
   console.log("Server received new game request");
   // Ask the table database to start a new game
-  tableDB.newGame(tblIdx, false, port, newGameCallback, res);
+  tableDB.newGame(tblName, false, port, newGameCallback, res);
 });
 
 
@@ -224,14 +214,14 @@ app.post("/newGame", function(req, res) {
 // Post handler for rebidding the current hand
 app.post("/rebid", function(req, res) {
   console.log("Server received rebid request");
-  tableDB.newGame(tblIdx, true, port, newGameCallback, res);
+  tableDB.newGame(tblName, true, port, newGameCallback, res);
 });
 
 // Post handler for ending a session
 app.post("/endGame", function(req, res) {
   console.log("Server received end game request");
   // Ask the table database to clean up this table
-  tableDB.endGame(tblIdx);
+  tableDB.endGame(tblName);
   res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
 });
 
