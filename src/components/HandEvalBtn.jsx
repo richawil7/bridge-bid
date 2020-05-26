@@ -6,7 +6,7 @@ function HandEvalBtn(props) {
 
   function clickHandler() {
     // Ask the server for the evaluation for my hand
-    const url = serverUrl + props.position + '/eval'
+    const url = serverUrl + props.position.tableName + '/' + props.position.seat + '/eval'
     axios.get(url)
         .then(response => {
             console.log("getHandEval: got response");

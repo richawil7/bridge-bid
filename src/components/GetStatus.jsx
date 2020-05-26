@@ -2,10 +2,11 @@ import React from "react";
 import axios from 'axios';
 import serverUrl from "./ServerUrl.jsx";
 
-function getStatus(st, setFx) {
+function getStatus(st, setFx, tableName) {
   var foundChange = false;
   var changeCount = st.delta;
-  const url = serverUrl + 'update';
+  // console.log('getStatus for table ' + tableName);
+  const url = serverUrl + tableName + '/update';
   axios.get(url)
       .then(response => {
           // console.log("getStatus: got response");
@@ -15,6 +16,9 @@ function getStatus(st, setFx) {
             foundChange = true;
           }
           if (response.data.bidHistory.length != st.bidHistory.length) {
+            foundChange = true;
+          }
+          if (response.data.gameNum != st.gameNum) {
             foundChange = true;
           }
           changeCount++;

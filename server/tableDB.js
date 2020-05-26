@@ -46,6 +46,7 @@ const playerSchema = new mongoose.Schema({
 const tableSchema = new mongoose.Schema({
   name: String,
   players: [playerSchema],
+  allPlayersJoined: Boolean,
   gameNum: Number,
   dealer: String,
   bidder: String,
@@ -86,18 +87,23 @@ function getNextBid(table, port) {
     // Asking the computer for a bid
     nextBid = playerModule.getBid(table.players[index], table.bid);
     // console.log("Computer bid " + nextBid.level + nextBid.suit + " for " + table.bidder);
-    const bidStr = Number(nextBid.level) + nextBid.suit;
-    const bidObj = {bid: bidStr, position: table.bidder};
-    const url = 'http://localhost:' + port.toString() + '/makeBid';
-    //const url = 'http://localhost:3000/makeBid';
-    axios.post(url, querystring.stringify(bidObj));
+    const bidStr = nextBid.level.toString() + nextBid.suit;
+    const bidObj = {bid: bidStr};
+    const url = 'http://localhost:' + port.toString() + '/' + table.name + '/' + table.bidder + '/makeBid';
+    axios.post(url, querystring.stringify(bidObj))
+    .then(function (response) {
+        // console.log("getNextBid: axios makeBid post result: " + response);
+    })
+    .catch(function (error) {
+        console.log("getNextBid: error in axios: " + error);
+    });
     // processBid(0, table, nextBid);
   }
 }
 
 /***** Database Operations *****/
 
-exports.createTable = function(tableName) {
+exports.createTable = function(tableName, callback, reqSeat, res) {
   // See if this table already exists
   TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
@@ -155,20 +161,36 @@ exports.createTable = function(tableName) {
         bidHistory: [],
         statusMsg: 'Table created. Waiting for players to sit'
       });
+
       // console.log(table);
-      table.save();
+      const promise = table.save();
+      promise
+      .then(function(result) {
+        callback(null, tableName, reqSeat, res);
+      })
+      .catch(function(err) {
+        console.log("createTable save: got error " + err);
+        callback(err, tableName, reqSeat, res);
+      });
     }
   });
 }
 
 exports.getTable = function(tableName, callback, res) {
-  // Get the table from the database
+  // Get table information from the database
   TableModel.findOne({name: tableName}, function(err, table) {
     if (err) {
       console.log("getTable findOne: got error " + err);
       return;
     }
-    callback(err, table, res);
+    const tableStatus = {
+      message: table.statusMsg,
+      bidder: table.bidder,
+      bidHistory: table.bidHistory,
+      gameNum: table.gameNum,
+      dealer: table.dealer
+    };
+    callback(err, tableStatus, res);
   });
 }
 
@@ -227,6 +249,7 @@ exports.joinPlayer = function(tableName, reqSeat, isHuman, callback, res) {
     .then(function(result) {
       // Return the assigned seat to the caller
       const seatObj = {
+        tableName: tableName,
         assignedSeat: assignedSeat,
         allPlayersJoined: table.allPlayersJoined
       };
@@ -279,7 +302,7 @@ exports.newGame = function(tableName, rebid, port, callback, res) {
       const promise = table.save();
       promise
       .then(function(result) {
-        callback(err, table.gameNum, res);
+        callback(err, tableName, table.gameNum, res);
         getNextBid(table, port);
       })
       .catch(function(err) {
@@ -359,7 +382,7 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
     const promise = table.save();
     promise
     .then(function(result) {
-      callback(null, table.bidCount);
+      callback(null, tableName, table.bidCount);
       if (table.passCount < 3) {
         getNextBid(table, port);
       }
@@ -387,7 +410,7 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
 
 exports.endGame = function(tableName) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
-  // Get the table from the database
+  // Delete the table from the database
   TableModel.deleteOne({name: tableName}, function(err, result) {
       if (err) {
         console.log("endGame deleteOne: got error " + err);

@@ -2,6 +2,7 @@ import React, {useEffect} from "react"
 import { useSSE } from 'react-hooks-sse';
 import axios from 'axios';
 import getStatus from "./GetStatus.jsx"
+import serverUrl from "./ServerUrl.jsx";
 
 function NewGame(props) {
   const state = props.state;
@@ -13,11 +14,12 @@ function NewGame(props) {
 
   useEffect(() => {
     console.log("In NewGame useEffect: remote new game event");
-    getStatus(props.state, props.setFx);
+    getStatus(props.state, props.setFx, props.position.tableName);
   }, [remoteNewGame.value]);
 
   function clickHandler() {
-    axios.post('/newGame', null)
+    const url = serverUrl + props.position.tableName + '/newGame';
+    axios.post(url, null)
       .then(function (response) {
         console.log(response);
       })
@@ -28,12 +30,6 @@ function NewGame(props) {
     props.setShowHand(false);
     // Disable show hand Evaluation
     props.setShowEval(false);
-/*
-    setTimeout(function() {
-      // props.setFx({...props.state, gameNum: newGameNum});
-      getStatus(props.state, props.setFx);
-    }, delayTime);
-*/
   }
 
   {return (

@@ -2,11 +2,11 @@ import React from 'react';
 import axios from 'axios';
 import serverUrl from "./ServerUrl.jsx";
 
-function RebidBtn() {
+function RebidBtn(props) {
 
   function clickHandler() {
     // Ask the server for the evaluation for my hand
-    const url = serverUrl + 'rebid';
+    const url = serverUrl + props.position.tableName + '/rebid';
     axios.post(url, null)
       .then(function (response) {
         console.log(response);

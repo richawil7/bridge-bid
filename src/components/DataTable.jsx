@@ -16,7 +16,7 @@ export default class DataTable extends React.Component {
 
   renderRow = (_row, rowIndex) => {
     const {rows} = this.props;
-
+    const {position} = this.props;
     return (
       <tr key={`row-${rowIndex}`}>
         {rows[rowIndex].map((_cell, cellIndex) => {
@@ -24,7 +24,9 @@ export default class DataTable extends React.Component {
             <Cell
               key={`${rowIndex}-${cellIndex}`}
               content={rows[rowIndex][cellIndex]}
-              position={this.props.position}
+              header={false}
+              tableName={position.tableName}
+              seat={position.seat}
             />
           )
         })}
@@ -33,7 +35,7 @@ export default class DataTable extends React.Component {
   };
 
   render() {
-    const {headings, rows} = this.props;
+    const {headings, rows, position} = this.props;
 
     this.renderHeadingRow = this.renderHeadingRow.bind(this);
     this.renderRow = this.renderRow.bind(this);

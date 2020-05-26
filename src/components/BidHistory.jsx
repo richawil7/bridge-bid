@@ -37,7 +37,7 @@ function BidHistory(props) {
 
   useEffect(() => {
     console.log("In BidHistory useEffect update");
-    getStatus(props.state, props.setFx);
+    getStatus(props.state, props.setFx, props.position.tableName);
   }, [lastBid.value]);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ function BidHistory(props) {
   return (
     <div className='bidHistory'>
       <h3>Bid History</h3>
-      <DataTable headings={headings} rows={rows} />
+      <DataTable headings={headings} rows={rows} position={props.position}/>
     </div>
   )
 }

@@ -10,7 +10,7 @@ function Hand(props) {
   });
 
   useEffect(() => {
-    const url = serverUrl + props.position + '/hand'
+    const url = serverUrl + props.tableName + '/' + props.seat + '/hand'
     axios.get(url)
       .then(response => {
           console.log(response);

@@ -46,7 +46,6 @@ function App() {
   const [showHands, setShowHands] = useState(false);
   const [showEval, setShowEval] = useState(false);
   const [handEval, setHandEval] = useState(undefined);
-  const serverEventUrl = serverUrl + "sse"
   var debug = false;
   //const [cookies, setCookie] = useCookies(['position']);
   // setCookie('position', newName, { path: '/' });
@@ -71,13 +70,13 @@ function App() {
       <Position state={state} setFx={setState} position={position} setPosition={setPosition} />
       {(position != undefined) ?
         (<div>
-          <SSEProvider endpoint={serverEventUrl}>
+          <SSEProvider endpoint={serverUrl + position.tableName + '/sse'}>
             <div className="row">
               <div className="col-lg-6">
                 <Status state={state} setFx={setState} position={position}/>
               </div>
               <div className="col-lg-2">
-                <BidHistory state={state} setFx={setState}/>
+                <BidHistory state={state} setFx={setState} position={position}/>
               </div>
               <div className="col-lg-2">
                 <BidGrid state={state} setFx={setState} position={position}/>
@@ -86,14 +85,14 @@ function App() {
             </div>
             <div className="row">
               <div className="col-lg-6">
-                <Hand state={state} position={position} />
+                <Hand state={state} tableName={position.tableName} seat={position.seat} />
               </div>
               <div className="col-lg-2 control">
-                <NewGame state={state} setFx={setState} setShowHand={setShowHands} setShowEval={setShowEval}/>
+                <NewGame state={state} setFx={setState} position={position} setShowHand={setShowHands} setShowEval={setShowEval}/>
                 <HandEvalBtn position={position} setShowFx={setShowEval} setEvalFx={setHandEval}/>
-                <RebidBtn />
+                <RebidBtn position={position} />
                 <ShowHands setFx={setShowHands} />
-                <EndGameBtn />
+                <EndGameBtn position={position} />
               </div>
               <div className="col-lg-3">
                 <HandEval showEval={showEval} handEval={handEval} />
@@ -110,19 +109,19 @@ function App() {
             <div className="col-lg-4"></div>
             <div className="col-lg-4">
               <h3 id='North'>North</h3>
-                <Hand state={state} position='North' />
+                <Hand state={state} tableName={position.tableName} seat='North' />
               </div>
             <div className="col-lg-4"></div>
           </div>
           <div className="row">
             <div className="col-lg-4">
               <h3 id='West' >West</h3>
-              <Hand state={state} position='West' />
+              <Hand state={state} tableName={position.tableName} seat='West' />
             </div>
             <div className="col-lg-2"></div>
             <div className="col-lg-4">
               <h3 id='East'>East</h3>
-              <Hand state={state} position='East' />
+              <Hand state={state} tableName={position.tableName} seat='East' />
             </div>
             <div className="col-lg-2"></div>
           </div>
@@ -130,7 +129,7 @@ function App() {
             <div className="col-lg-4"></div>
             <div className="col-lg-4">
               <h3 id='South'>South</h3>
-              <Hand state={state} position='South' />
+              <Hand state={state} tableName={position.tableName} seat='South' />
             </div>
             <div className="col-lg-4"></div>
           </div>

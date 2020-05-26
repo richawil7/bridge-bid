@@ -18,7 +18,7 @@ function BidGrid(props) {
 
   return (
     <div>
-      {(props.state.bidder === props.position) ?
+      {(props.state.bidder === props.position.seat) ?
         ( <div className='bidEntry'>
             <h3>Enter A Bid</h3>
             <div className='bidGrid'>
