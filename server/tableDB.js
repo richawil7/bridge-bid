@@ -388,7 +388,7 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
       table.bidder = playerModule.getNextPlayer(table.bidder);
       table.statusMsg = "Waiting on " + table.bidder + " to bid."
     } else {
-      table.statusMsg = "This hand is over. Press new game to play again."
+      table.statusMsg = "This hand is over. Press new game to play again, or end game to quit."
     }
     const promise = table.save();
     promise

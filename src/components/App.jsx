@@ -92,7 +92,7 @@ function App() {
                 <HandEvalBtn position={position} setShowFx={setShowEval} setEvalFx={setHandEval}/>
                 <RebidBtn position={position} />
                 <ShowHands setFx={setShowHands} />
-                <EndGameBtn position={position} />
+                <EndGameBtn position={position} state={state} setFx={setState} />
               </div>
               <div className="col-lg-3">
                 <HandEval showEval={showEval} handEval={handEval} />

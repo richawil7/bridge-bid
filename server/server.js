@@ -241,11 +241,19 @@ app.post("/:tblName/rebid", function(req, res) {
 app.post("/:tblName/endGame", function(req, res) {
   const tblName = req.params.tblName;
   console.log("Server received end game request from table " + tblName);
+
+  // res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
+  // Announce that this session is over
+  const emitter = tables.getEmitter(tblName);
+  emitter.emit('push', 'endGameEvent', {
+    value: true
+  });
   // Ask the table database to clean up this table
   tableDB.endGame(tblName);
   tables.removeTable(tblName);
   res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
 });
+
 
 // Home page
 app.use('/', function(req, res) {
