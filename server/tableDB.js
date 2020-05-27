@@ -1,3 +1,12 @@
+/* This module represents a bridge table and stores it in a MongoDB database.
+ * In the database, we keep table state and characteristics.
+ * But for dynamically created objects associated with a table, these are kept
+ * in a tables array in server memory by the file tables.js.
+ */
+
+// Require the dynamic tables module
+const tables = require(__dirname + "/tables.js");
+
 // Require the bidMgr handModule
 const bidMgr = require(__dirname + "/bidMgr.js");
 
@@ -102,20 +111,9 @@ function getNextBid(table, port) {
 }
 
 /***** Database Operations *****/
-
-exports.createTable = function(tableName, callback, reqSeat, res) {
-  // See if this table already exists
-  TableModel.findOne({name: tableName}, function(err, table) {
-    if (err) {
-      console.log("createTable find: got error " + err);
-      return;
-    }
-    if (table != null) {
-      console.log("createTable: table already exists ");
-    } else {
-      console.log("createTable: table not found. Creating it");
-      var newPlayer = playerModule.Player("East", false);
-      const east = {
+function createTable(tableName) {
+  var newPlayer = playerModule.Player("East", false);
+  const east = {
         objectId: newPlayer,
         position: 'East',
         isHuman: false,
@@ -124,9 +122,9 @@ exports.createTable = function(tableName, callback, reqSeat, res) {
                totalPts: 0,
                openingBid: {level: 0, suit: 'C'},
                player: 'East'}
-      };
-      newPlayer = playerModule.Player("West", false);
-      const west = {
+  };
+  newPlayer = playerModule.Player("West", false);
+  const west = {
         objectId: newPlayer,
         position: 'West',
         isHuman: false,
@@ -135,10 +133,10 @@ exports.createTable = function(tableName, callback, reqSeat, res) {
                totalPts: 0,
                openingBid: {level: 0, suit: 'C'},
                player: 'West'}
-      };
-      // FIX ME
-      newPlayer = playerModule.Player("South", false);
-      const south = {
+  };
+  // FIX ME
+  newPlayer = playerModule.Player("South", false);
+  const south = {
         objectId: newPlayer,
         position: 'South',
         isHuman: false,
@@ -147,32 +145,107 @@ exports.createTable = function(tableName, callback, reqSeat, res) {
                totalPts: 0,
                openingBid: {level: 0, suit: 'C'},
                player: 'South'}
-      };
-      const table = new TableModel({
-        name: tableName,
-        players: [east, west, south],
-        allPlayersJoined: false,
-        gameNum: 0,
-        dealer: 'North',
-        bidder: 'North',
-        bid: {level: 0, suit: 'C'},
-        passCount: 0,
-        bidCount: 0,
-        bidHistory: [],
-        statusMsg: 'Table created. Waiting for players to sit'
-      });
+  };
+  const table = new TableModel({
+    name: tableName,
+    players: [east, west, south],
+    allPlayersJoined: false,
+    gameNum: 0,
+    dealer: 'North',
+    bidder: 'North',
+    bid: {level: 0, suit: 'C'},
+    passCount: 0,
+    bidCount: 0,
+    bidHistory: [],
+    statusMsg: 'Table created. Waiting for players to sit'
+  });
+  return table;
+}
 
-      // console.log(table);
-      const promise = table.save();
-      promise
-      .then(function(result) {
-        callback(null, tableName, reqSeat, res);
-      })
-      .catch(function(err) {
-        console.log("createTable save: got error " + err);
-        callback(err, tableName, reqSeat, res);
-      });
+function addPlayerToTable(table, newTable, seat, callback, res) {
+  const newPlayerObj = playerModule.Player(seat, true);
+  const newPlayer = {
+    objectId: newPlayerObj,
+    position: seat,
+    isHuman: true,
+    hand: {handCards: [],
+           hcPts: 0,
+           totalPts: 0,
+           openingBid: {level: 0, suit: 'C'},
+           player: seat}
+  };
+  table.players.push(newPlayer);
+
+  // Check how many players we have at the table
+  const playerCount = table.players.length;
+  console.log("You have " + playerCount + " players");
+  if (playerCount == 4) {
+    console.log("All players have joined");
+    table.allPlayersJoined = true;
+    table.statusMsg = "Waiting on new game request";
+  } else {
+    const missingPlayer = (seat === "North") ? 'South' : 'North';
+    table.statusMsg = "Waiting on " + missingPlayer + " to join";
+  }
+
+  const promise = table.save();
+  promise
+  .then(function(result) {
+    // Return the assigned seat to the caller
+    const seatObj = {
+      tableName: table.name,
+      assignedSeat: seat,
+      allPlayersJoined: table.allPlayersJoined,
+      newTable: newTable
+    };
+    callback(null, seatObj, res);
+  })
+  .catch(function(err) {
+    console.log("addPlayerToTable save: got error " + err);
+    callback(internalProcessBid, null, res);
+  });
+}
+
+exports.sitAtTable = function(tableName, reqSeat, callback, res) {
+  // Check if this table already exists
+  TableModel.findOne({name: tableName}, function(err, table) {
+    if (err) {
+      console.log("sitAtTable findOne: got error " + err);
+      return;
     }
+    var assignedSeat = reqSeat;
+    var newTable;
+    if (table) {
+      // Found an existing table
+      newTable = false;
+      // Check how many players are already seated
+      if (table.players.length === 4) {
+        // Table is full. Reject the request.
+        callback("Table exists and is full", null, res);
+        return;
+      } else if (table.players.length === 3) {
+        // We have an available seat
+        for (let i=0; i<3; i++) {
+          if (table.players[i].position === 'North') {
+            assignedSeat = 'South';
+            break;
+          } else if (table.players[i].position === 'South') {
+            assignedSeat = 'North';
+            break;
+          }
+        }
+      }
+    } else {
+      // Table does not exist. Let's create it.
+      newTable = true;
+      table = createTable(tableName);
+    }
+
+    // console.log('sitAtTable: name=' + table.name);
+    // const tblStr = (newTable) ? 'This is a new table' : 'This is an existing table';
+    // console.log(tblStr);
+    // Add the new player to the table
+    addPlayerToTable(table, newTable, assignedSeat, callback, res);
   });
 }
 
@@ -194,73 +267,6 @@ exports.getTable = function(tableName, callback, res) {
   });
 }
 
-
-exports.joinPlayer = function(tableName, reqSeat, isHuman, callback, res) {
-  var assignedSeat = null;
-  var missingPlayer;
-  (reqSeat == 'North') ? (missingPlayer = 'South') : (missingPlayer = 'North');
-
-  // Get the table from the database
-  TableModel.findOne({name: tableName}, function(err, table) {
-    if (err) {
-      console.log("joinPlayer findOne: got error " + err);
-      callback(err, null);
-      return;
-    }
-    console.log("joinPlayer: found table " + table);
-    // Check if this player already exists
-    var index = -1;
-    for (let i=0; i<table.players.length; i++) {
-      if (table.players[i].position === reqSeat) {
-        console.log("Already have a player sitting at " + reqSeat);
-        assignedSeat = missingPlayer;
-        break;
-      }
-    }
-    if (!assignedSeat) {
-      assignedSeat = reqSeat;
-    }
-    var newPlayer = playerModule.Player(assignedSeat, isHuman);
-    const player = {
-      objectId: newPlayer,
-      position: assignedSeat,
-      isHuman: isHuman,
-      hand: {handCards: [],
-             hcPts: 0,
-             totalPts: 0,
-             openingBid: {level: 0, suit: 'C'},
-             player: assignedSeat}
-    };
-    table.players.push(player);
-
-    // Check how many players we have at the table
-    const playerCount = table.players.length;
-    console.log("You have " + playerCount + " players");
-    if (playerCount == 4) {
-      console.log("All players have joined");
-      table.allPlayersJoined = true;
-      table.statusMsg = "Waiting on new game request";
-    } else {
-      table.statusMsg = "Waiting on " + missingPlayer + " to join";
-    }
-
-    const promise = table.save();
-    promise
-    .then(function(result) {
-      // Return the assigned seat to the caller
-      const seatObj = {
-        tableName: tableName,
-        assignedSeat: assignedSeat,
-        allPlayersJoined: table.allPlayersJoined
-      };
-      callback(null, seatObj, res);
-    })
-    .catch(function(err) {
-      console.log("joinPlayer save: got error " + err);
-      callback(err, null, res);
-    });
-  });
-}
 
 exports.newGame = function(tableName, rebid, port, callback, res) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
@@ -287,7 +293,12 @@ exports.newGame = function(tableName, rebid, port, callback, res) {
       }
       TableModel.updateOne({name: tableName}, { $set: {bidHistory: newHistory }},  {multi:true},
         function(err, affected) {
-          console.log('Clear bidHistory result: ', affected);
+          if (err) {
+            console.log("newGame updateOne: clear history got error " + err);
+            callback(err, null);
+            return;
+          }
+          console.log('Cleared bidHistory. result: ', affected);
         }
       );
       table.gameNum++;

@@ -47,8 +47,9 @@ function Position(props) {
     <div>
       {(position == undefined) ? (
         <div className="position">
-          <h3>Select A Table and Seat</h3>
+          <h3>Select A Table by Name</h3>
           <input id="tblNameId" type="text" name="tblName" size="16" placeholder="Table Name?" />
+          <h3>Select A Seat at the Table</h3>
           <div className="dropdown">
             <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Position
@@ -57,7 +58,7 @@ function Position(props) {
               <button className="dropdown-item" type="button" data-seat="North" onClick={seatSelected} >North</button>
               <button className="dropdown-item" type="button" data-seat="South" onClick={seatSelected} >South</button>
             </div>
-            <button className="btn btn-primary" onClick={submitHandler} type="button">
+            <button className="btn btn-primary btn-submit" onClick={submitHandler} type="button">
               Submit
             </button>
           </div>

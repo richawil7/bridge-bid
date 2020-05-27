@@ -103,49 +103,37 @@ function processBid(bidStr, tblName, bidder) {
 
 // ************* Create Table and Join Player Handling
 // New Player Handling
-function takeSeatCallback(err, result, res) {
+function sitTableCallback(err, seatObj, res) {
   if (err) {
-    console.log("takeSeatCallback: got error " + err);
+    console.log("sitTableCallback: got error " + err);
     return;
   }
-  // result is an object boolean indicating if all players are sitting at the table
-  // and the assigned seat
-  if (result.allPlayersJoined) {
-    const emitter = tables.getEmitter(result.tableName);
+  /*
+  console.log("sitTableCallback: tableName=" + seatObj.tableName);
+  console.log("sitTableCallback: seat=" + seatObj.assignedSeat);
+  console.log("sitTableCallback: newTable=" + seatObj.newTable);
+  console.log("sitTableCallback: all player joined=" + seatObj.allPlayersJoined);
+  */
+  if (seatObj.newTable) {
+    // New table, but still waiting for last player
+    tables.addTable(seatObj.tableName);
+    tables.setEmitter(seatObj.tableName, new EventEmitter());
+  }
+  if (seatObj.allPlayersJoined) {
+    const emitter = tables.getEmitter(seatObj.tableName);
     emitter.emit('push', 'playerEvent', {
       value: 4
     });
   }
-  //console.log('takeSeatCallback: table=' + result.tableName);
-  //console.log('takeSeatCallback: seat=' + result.assignedSeat);
-  res.send(JSON.stringify(result));
+  res.send(JSON.stringify(seatObj));
 }
 
-function createTableCallback(err, tblName, reqSeat, res) {
-  if (err) {
-    console.log("createTableCallback: got error " + err);
-    return;
-  }
-  tableDB.joinPlayer(tblName, reqSeat, true, takeSeatCallback, res);
-}
 // Post handler to add a new player
 app.post("/sit", function(req, res) {
   const tblName = req.body.tableName;
   const reqSeat = req.body.seat;
   console.log("Server received request to sit for " + reqSeat + " at " + tblName);
-  const result = tables.sitAtTable(tblName);
-  if (result.err) {
-    console.log("Failed to find seat at table " + tblName);
-  } else {
-    if (result.newTable) {
-      // Need to create a new table
-      emitter = new EventEmitter();
-      tables.setEmitter(tblName, emitter);
-      tableDB.createTable(tblName, createTableCallback, reqSeat, res);
-    } else {
-      tableDB.joinPlayer(tblName, reqSeat, true, takeSeatCallback, res);
-    }
-  }
+  tableDB.sitAtTable(tblName, reqSeat, sitTableCallback, res);
 });
 
 // ************* New Game Handling
@@ -255,6 +243,7 @@ app.post("/:tblName/endGame", function(req, res) {
   console.log("Server received end game request from table " + tblName);
   // Ask the table database to clean up this table
   tableDB.endGame(tblName);
+  tables.removeTable(tblName);
   res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
 });
 
