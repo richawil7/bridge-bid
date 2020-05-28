@@ -60,11 +60,11 @@ function App() {
     startPolling(state, setState);
   };
 */
-
+/*
   useEffect(() => {
     console.log("In App useEffect. epoch=" + state.epoch);
   });
-
+*/
   return (
     <div>
       <Header />

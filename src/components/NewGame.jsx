@@ -6,7 +6,7 @@ import serverUrl from "./ServerUrl.jsx";
 
 function NewGame(props) {
   const state = props.state;
-  const delayTime = 2* 1000;
+  const delayTime = 2 * 1000;
 
   const remoteNewGame = useSSE('newGameEvent', {
     value: 0

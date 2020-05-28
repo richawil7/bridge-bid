@@ -48,7 +48,7 @@ var eventIndex = 0;
 /***** Initialization *****/
 bidMgr.init();
 tableDB.init();
-
+tables.init();
 
 // FIX ME  Create a single table for now
 // const tblName = "tbl1";
@@ -154,6 +154,7 @@ app.post("/:tblName/newGame", function(req, res) {
   console.log("Server received new game request from table " + tblName);
   // Ask the table database to start a new game
   tableDB.newGame(tblName, false, port, newGameCallback, res);
+  tables.newGame(tblName);
 });
 
 
@@ -173,7 +174,7 @@ function getHandCallback(err, cards, res) {
 app.get("/:tblName/:seat/hand", function(req, res) {
     const tblName = req.params.tblName;
     const seat = req.params.seat;
-    console.log("In server get hand for " + seat);
+    //console.log("In server get hand for " + seat);
     tableDB.getHand(tblName, seat, getHandCallback, res);
 });
 
@@ -267,8 +268,8 @@ app.post("/:tblName/endGame", function(req, res) {
     value: true
   });
   // Ask the table database to clean up this table
-  tableDB.endGame(tblName);
-  tables.removeTable(tblName);
+  tableDB.deleteTable(tblName);
+  tables.deleteTable(tblName);
   res.sendFile(path.resolve(__dirname + "/../public/endGame.html"));
 });
 
@@ -288,3 +289,13 @@ if (port == null || port == "") {
 app.listen(port, function() {
   console.log("Server started on port " + port);
 });
+
+
+exports.notifyDelete = function(tblName) {
+  // This function is called when a table has been deleted due to inactivity
+  // We want to emit a notification to the players at that table
+  const emitter = tables.getEmitter(tblName);
+  emitter.emit('push', 'endGameEvent', {
+    value: true
+  });
+}

@@ -339,7 +339,7 @@ exports.getHand = function(tableName, position, callback, res) {
         var cardsInHand = [];
         if ((table.players[i].hand != undefined) &&
             (table.players[i].hand.handCards.length == 13)) {
-          console.log("Server has valid hand for " + position);
+          // console.log("Server has valid hand for " + position);
           table.players[i].hand.handCards.forEach(function(card) {
             let aCard = {suit: card.suit, value: card.value};
             cardsInHand.push(aCard);
@@ -449,15 +449,15 @@ exports.addChatMsg = function(tableName, seat, message, callback, res) {
 }
 
 
-exports.endGame = function(tableName) {
+exports.deleteTable= function(tableName) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand
   // Delete the table from the database
   TableModel.deleteOne({name: tableName}, function(err, result) {
       if (err) {
-        console.log("endGame deleteOne: got error " + err);
+        console.log("deleteTable deleteOne: got error " + err);
         return;
       }
-      console.log("tableDB endGame: closed table " + tableName + " result: " + result);
+      console.log("tableDB deleteTable: closed table " + tableName + " result: " + result);
     }
   )
 }

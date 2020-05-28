@@ -40,12 +40,6 @@ function BidHistory(props) {
     getStatus(props.state, props.setFx, props.position.tableName);
   }, [lastBid.value]);
 
-  useEffect(() => {
-    console.log("In BidHistory useEffect rerender");
-  }, [state.delta]);
-
-  // const rows = [['X', '0C', '1C', '1D'], ['1S', '1N']];
-  // console.log("Rows: " + rows);
 
   return (
     <div className='bidHistory'>
