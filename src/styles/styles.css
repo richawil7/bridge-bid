@@ -3,19 +3,27 @@
 h1 {
   font-size: 20px;
   color: #5eacb5;
+  margin: 5px 0 5px 5px;
 }
 h3 {
   font-size: 16px;
   color: #5eacb5;
+  margin-bottom: 0;
 }
 h4 {
   font-size: 14px;
 }
+h6 {
+  font-size: 10px;
+}
 p {
-  font-size: 12px;
+  font-size: 10px;
 }
 .heading {
-  margin: 20px 0 30px 20px;
+  margin: 20px 0 5px 20px;
+}
+.section {
+  margin: 20px 0 0 20px;
 }
 
 /* Position Section */
@@ -34,14 +42,25 @@ p {
 }
 
 /* Status Section */
-.status {
-  position: relative;
-  margin: 20px 0 50px 20px;
-}
 #statusDiv {
   border: 2px solid black;
   font-size: 10px;
   background-color: #a6d3de;
+}
+
+/* Chat Section */
+.chatSection {
+  position: relative;
+  margin: 0 0 30px 20px;
+  border: 2px solid black;
+  background-color: #a6d3de;
+  font-size: 10px;
+}
+#chanInBtn {
+  margin-left: 30px;
+}
+#chatInId {
+  width: 90%;
 }
 
 /* Bid Entry Section */

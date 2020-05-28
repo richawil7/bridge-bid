@@ -56,14 +56,14 @@ const tableSchema = new mongoose.Schema({
   name: String,
   players: [playerSchema],
   allPlayersJoined: Boolean,
-  gameNum: Number,
   dealer: String,
   bidder: String,
   bid: bidSchema,
   passCount: Number,
-  bidCount: Number,
   bidHistory: [bidSchema],
-  statusMsg: String
+  statusMsg: String,
+  chats: [String],
+  epoch: Number
 });
 
 // Create a model for a table from the schema.
@@ -150,14 +150,14 @@ function createTable(tableName) {
     name: tableName,
     players: [east, west, south],
     allPlayersJoined: false,
-    gameNum: 0,
     dealer: 'North',
     bidder: 'North',
     bid: {level: 0, suit: 'C'},
     passCount: 0,
-    bidCount: 0,
     bidHistory: [],
-    statusMsg: 'Table created. Waiting for players to sit'
+    chats: [],
+    statusMsg: 'Table created. Waiting for players to sit',
+    epoch: 0
   });
   return table;
 }
@@ -260,8 +260,9 @@ exports.getTable = function(tableName, callback, res) {
       message: table.statusMsg,
       bidder: table.bidder,
       bidHistory: table.bidHistory,
-      gameNum: table.gameNum,
-      dealer: table.dealer
+      dealer: table.dealer,
+      chats: table.chats,
+      epoch: table.epoch
     };
     callback(err, tableStatus, res);
   });
@@ -301,10 +302,10 @@ exports.newGame = function(tableName, rebid, port, callback, res) {
           console.log('Cleared bidHistory. result: ', affected);
         }
       );
-      table.gameNum++;
       table.bidder = table.dealer;
       table.passCount = -1;
       table.statusMsg = "Waiting on " + table.bidder + " to bid";
+      table.epoch++;
 
       // Ask the bid manager to deal the cards
       if (!rebid) {
@@ -313,7 +314,7 @@ exports.newGame = function(tableName, rebid, port, callback, res) {
       const promise = table.save();
       promise
       .then(function(result) {
-        callback(err, tableName, table.gameNum, res);
+        callback(err, tableName, res);
         getNextBid(table, port);
       })
       .catch(function(err) {
@@ -376,9 +377,9 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
       console.log("tableDB processBid: expected bidder " + table.bidder + ", got " + bidder);
       return;
     }
-    table.bidCount++;
     table.bid = nextBid;
     table.bidHistory.push(nextBid);
+    table.epoch++;
     if ((nextBid.level === 0) && (nextBid.suit === 'C')) {
       table.passCount++;
     } else {
@@ -393,7 +394,7 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
     const promise = table.save();
     promise
     .then(function(result) {
-      callback(null, tableName, table.bidCount);
+      callback(null, tableName);
       if (table.passCount < 3) {
         getNextBid(table, port);
       }
@@ -418,6 +419,35 @@ function processBid(tableName, table, nextBid, port, callback, bidder) {
     internalProcessBid(table, nextBid, bidder);
   }
 }
+
+
+exports.addChatMsg = function(tableName, seat, message, callback, res) {
+  // Get the table from the database
+  TableModel.findOne({name: tableName}, function(err, table) {
+    if (err) {
+      console.log("addChatMsg findOne: got error " + err);
+      callback(err, tableName, res);
+      return;
+    }
+    if (table.chats.length >= 5) {
+      // Maintain a limit on the number of stored chat messages
+      table.chats.shift();
+    }
+    table.chats.push(message);
+    table.epoch++;
+
+    const promise = table.save();
+    promise
+    .then(function(result) {
+      callback(null, tableName, res);
+    })
+    .catch(function(err) {
+      console.log("addChatMsg save: got error " + err);
+      callback(err, tableName, res);
+    });
+  })
+}
+
 
 exports.endGame = function(tableName) {
   // rebid parameter is a boolean. If true, means we want to rebid the existing hand

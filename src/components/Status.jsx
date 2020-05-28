@@ -5,26 +5,26 @@ import getStatus from "./GetStatus.jsx"
 function Status(props) {
   const state = props.state;
 
-  const numPlayers = useSSE('playerEvent', {
+  const refreshIndex = useSSE('refreshEvent', {
     value: 0
   });
 
   useEffect(() => {
-    console.log("In Status useEffect: player event");
+    console.log("In Status useEffect: refresh event");
     getStatus(props.state, props.setFx, props.position.tableName);
-  }, [numPlayers.value]);
+  }, [refreshIndex.value]);
 
   useEffect(() => {
     console.log("In Status useEffect");
-  }, [state.message]);
+  }, [state.epoch]);
 
   return (
-    <div className='status'>
+    <div className="section">
       <h3>Status</h3>
       <div id="statusDiv">
-        <h4>You are playing for {props.position.seat}</h4>
-        <h4>Dealer is {state.dealer}</h4>
-        <h4>{state.message}</h4>
+        <h6>You are playing for {props.position.seat}</h6>
+        <h6>Dealer is {state.dealer}</h6>
+        <h6>{state.message}</h6>
       </div>
     </div>
   );

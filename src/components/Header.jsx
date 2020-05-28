@@ -11,7 +11,7 @@ function Header() {
       <script>console.log("Running embedded script")</script>
       <script type="text/javascript" src="test.js" ></script>
       <script type="text/javascript" src="event.js" ></script>
-      <h1 className="heading" >
+      <h1>
         Practice Bridge Bidding
       </h1>
     </div>

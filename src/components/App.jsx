@@ -9,6 +9,8 @@ import BidGrid from "./BidGrid.jsx";
 import Hand from "./Hand.jsx";
 import NewGame from "./NewGame.jsx";
 import Status from "./Status.jsx";
+import ChatInput from "./ChatInput.jsx";
+import ChatOutput from "./ChatOutput.jsx";
 import BidHistory from "./BidHistory.jsx";
 import HandEvalBtn from "./HandEvalBtn.jsx";
 import RebidBtn from "./RebidBtn.jsx";
@@ -33,13 +35,13 @@ import '../styles/styles.css';
 function App() {
 
   var initState = {
+    gameNum: 0,
     message: "Client side Uninitialized",
     bidder: "Unknown",
-    game: "init",
     bidHistory: [],
+    chats: [],
     dealer: "Unknown",
-    delta: 0,
-    gameNum: 0
+    epoch: 0,
   };
   const [state, setState] = useState(initState);
   const [position, setPosition] = useState(undefined);
@@ -60,7 +62,7 @@ function App() {
 */
 
   useEffect(() => {
-    console.log("In App useEffect. Delta=" + state.delta);
+    console.log("In App useEffect. epoch=" + state.epoch);
   });
 
   return (
@@ -74,6 +76,11 @@ function App() {
             <div className="row">
               <div className="col-lg-6">
                 <Status state={state} setFx={setState} position={position}/>
+                <h3 className="section" >Chat</h3>
+                <div className="chatSection">
+                  <ChatInput position={position} />
+                  <ChatOutput state={state} setFx={setState} position={position} />
+                </div>
               </div>
               <div className="col-lg-2">
                 <BidHistory state={state} setFx={setState} position={position}/>

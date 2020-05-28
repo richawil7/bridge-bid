@@ -14,6 +14,7 @@ function NewGame(props) {
 
   useEffect(() => {
     console.log("In NewGame useEffect: remote new game event");
+    props.setFx({...props.state, gameNum: state.gameNum + 1});
     getStatus(props.state, props.setFx, props.position.tableName);
   }, [remoteNewGame.value]);
 

@@ -42,20 +42,13 @@ app.get('/:tblName/sse', (req, res) => {
 });
 
 
-/***** Global objects *****
-var players = [];
-var gameNum = 0;
-var dealer = 'North';
-var bidder = 'Unknown';
-var bid;
-var passCount;
-var bidHistory = [];
-var statusMsg = "Uninitialized";
-*/
+/***** Global objects *****/
+var eventIndex = 0;
 
 /***** Initialization *****/
 bidMgr.init();
 tableDB.init();
+
 
 // FIX ME  Create a single table for now
 // const tblName = "tbl1";
@@ -65,12 +58,13 @@ tableDB.init();
 /***** State Machine Event Handlers *****/
 
 /* Bid Processing */
-function processBidCallback(err, tblName, bidCount) {
+function processBidCallback(err, tblName) {
   // console.log("Pushing new bid event");
   // Announce a new bid was received
+  eventIndex++;
   const emitter = tables.getEmitter(tblName);
   emitter.emit('push', 'bidStream', {
-    value: bidCount,
+    value: eventIndex
   });
 }
 
@@ -120,9 +114,10 @@ function sitTableCallback(err, seatObj, res) {
     tables.setEmitter(seatObj.tableName, new EventEmitter());
   }
   if (seatObj.allPlayersJoined) {
+    eventIndex++;
     const emitter = tables.getEmitter(seatObj.tableName);
-    emitter.emit('push', 'playerEvent', {
-      value: 4
+    emitter.emit('push', 'refreshEvent', {
+      value: eventIndex
     });
   }
   res.send(JSON.stringify(seatObj));
@@ -137,7 +132,7 @@ app.post("/sit", function(req, res) {
 });
 
 // ************* New Game Handling
-function newGameCallback(err, tblName, gameNum, res) {
+function newGameCallback(err, tblName, res) {
   if (err) {
     console.log("newGameCallback: got error " + err);
     return;
@@ -145,9 +140,10 @@ function newGameCallback(err, tblName, gameNum, res) {
   // result is the game Number
   console.log("Pushing new game event for table " + tblName);
   const emitter = tables.getEmitter(tblName);
-  console.log(emitter);
+  // console.log(emitter);
+  eventIndex++;
   emitter.emit('push', 'newGameEvent', {
-    value: gameNum
+    value: eventIndex
   });
   res.send('OK');
 }
@@ -229,6 +225,27 @@ app.get("/:tblName/:seat/eval", function(req, res) {
 });
 
 
+// Chat Input Handling
+function chatInputCallback(err, tblName, res) {
+  const emitter = tables.getEmitter(tblName);
+  eventIndex++;
+  emitter.emit('push', 'chatEvent', {
+    value: eventIndex
+  });
+  res.sendStatus(200);
+}
+// Post handler for a chat message received from a client
+app.post("/:tblName/:seat/chatInput", function(req, res) {
+  const tblName = req.params.tblName;
+  const seat = req.params.seat;
+  console.log('Server received chat input from ' + seat + ' at table ' + tblName);
+  var chatMsg = req.body.message;
+  // console.log(chatMsg);
+  chatMsg = seat + ': ' + chatMsg
+  tableDB.addChatMsg(tblName, seat, chatMsg, chatInputCallback, res);
+});
+
+
 // Rebid Handling
 // Post handler for rebidding the current hand
 app.post("/:tblName/rebid", function(req, res) {
@@ -236,6 +253,7 @@ app.post("/:tblName/rebid", function(req, res) {
   console.log("Server received rebid request from table " + tblName);
   tableDB.newGame(tblName, true, port, newGameCallback, res);
 });
+
 
 // Post handler for ending a session
 app.post("/:tblName/endGame", function(req, res) {
